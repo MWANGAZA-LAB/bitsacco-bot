@@ -6,24 +6,10 @@
   "type": "module",
   "scripts": {
     "start": "node dist/index.js",
-    "dev": "concurrently \"tsc --watch\" \"nodemon dist/index.js\" \"python python/main.py\"",
-    "build": "npm run build:ts && npm run build:python",
-    "build:ts": "tsc",
-    "build:python": "cd python && python -m pip install -r requirements.txt",
-    "type-check": "tsc --noEmit",
-    "test": "npm run test:ts && npm run test:python",
-    "test:ts": "jest --coverage",
-    "test:python": "cd python && python -m pytest",
-    "test:watch": "jest --watch",
-    "test:integration": "jest --testPathPattern=integration",
-    "lint": "npm run lint:ts && npm run lint:python",
-    "lint:ts": "eslint src/ --ext .ts",
-    "lint:python": "cd python && python -m flake8 .",
-    "lint:fix": "eslint src/ --ext .ts --fix",
-    "format": "prettier --write src/ && cd python && python -m black .",
-    "health-check": "node dist/health-check.js",
-    "docker:build": "docker build -t bitsacco-assistant .",
-    "docker:run": "docker run -p 3000:3000 -p 8000:8000 bitsacco-assistant"
+    "dev": "concurrently \"tsc --watch\" \"nodemon dist/index.js\"",
+    "build": "tsc",
+    "test": "jest",
+    "lint": "eslint src/ --ext .ts"
   },
   "keywords": [
     "bitsacco",
