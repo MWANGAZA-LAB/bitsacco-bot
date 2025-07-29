@@ -28,18 +28,7 @@ import {
   Error,
   Warning,
 } from '@mui/icons-material'
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
-} from 'recharts'
+// Removed unused recharts imports
 
 import { apiService } from '../services/api'
 
