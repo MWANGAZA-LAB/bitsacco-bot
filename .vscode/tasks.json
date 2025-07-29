@@ -1,0 +1,193 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Start Bitsacco Bot",
+			"type": "shell",
+			"command": "python",
+			"args": [
+				"run.py"
+			],
+			"group": "build",
+			"isBackground": false,
+			"problemMatcher": [],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "new"
+			}
+		},
+		{
+			"label": "Run Tests",
+			"type": "shell",
+			"command": "python",
+			"args": [
+				"-m",
+				"pytest",
+				"tests/",
+				"-v"
+			],
+			"group": "test",
+			"isBackground": false,
+			"problemMatcher": [],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "new"
+			}
+		},
+		{
+			"label": "Run Tests with Coverage",
+			"type": "shell",
+			"command": "python",
+			"args": [
+				"-m",
+				"pytest",
+				"tests/",
+				"--cov=app",
+				"--cov-report=term-missing",
+				"--cov-report=html"
+			],
+			"group": "test",
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Format Code (Black)",
+			"type": "shell",
+			"command": "python",
+			"args": [
+				"-m",
+				"black",
+				"app/",
+				"tests/"
+			],
+			"group": "build",
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Lint Code (Flake8)",
+			"type": "shell",
+			"command": "python",
+			"args": [
+				"-m",
+				"flake8",
+				"app/",
+				"tests/",
+				"--max-line-length=88",
+				"--extend-ignore=E203,W503"
+			],
+			"group": "build",
+			"isBackground": false,
+			"problemMatcher": [
+				{
+					"owner": "python",
+					"fileLocation": "absolute",
+					"pattern": {
+						"regexp": "^(.+):(\\d+):(\\d+):\\s+(\\w+)\\s+(.+)$",
+						"file": 1,
+						"line": 2,
+						"column": 3,
+						"severity": 4,
+						"message": 5
+					}
+				}
+			]
+		},
+		{
+			"label": "Type Check (MyPy)",
+			"type": "shell",
+			"command": "python",
+			"args": [
+				"-m",
+				"mypy",
+				"app/",
+				"--ignore-missing-imports"
+			],
+			"group": "build",
+			"isBackground": false,
+			"problemMatcher": [
+				{
+					"owner": "python",
+					"fileLocation": "absolute",
+					"pattern": {
+						"regexp": "^(.+):(\\d+):\\s*(.+)$",
+						"file": 1,
+						"line": 2,
+						"message": 3
+					}
+				}
+			]
+		},
+		{
+			"label": "Install Dependencies",
+			"type": "shell",
+			"command": "python",
+			"args": [
+				"-m",
+				"pip",
+				"install",
+				"-r",
+				"requirements.txt"
+			],
+			"group": "build",
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Start Development Server",
+			"type": "shell",
+			"command": "uvicorn",
+			"args": [
+				"app.main:app",
+				"--reload",
+				"--host",
+				"0.0.0.0",
+				"--port",
+				"8000"
+			],
+			"group": "build",
+			"isBackground": true,
+			"problemMatcher": [],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "new"
+			}
+		},
+		{
+			"label": "Build Docker Image",
+			"type": "shell",
+			"command": "docker",
+			"args": [
+				"build",
+				"-t",
+				"bitsacco-bot",
+				"."
+			],
+			"group": "build",
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Run Docker Container",
+			"type": "shell",
+			"command": "docker",
+			"args": [
+				"run",
+				"-p",
+				"8000:8000",
+				"--env-file",
+				".env",
+				"bitsacco-bot"
+			],
+			"group": "build",
+			"isBackground": true,
+			"problemMatcher": []
+		}
+	]
+}

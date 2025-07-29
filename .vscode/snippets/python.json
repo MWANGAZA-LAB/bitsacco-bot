@@ -1,0 +1,168 @@
+{
+  "FastAPI Service": {
+    "prefix": "fastapi-service",
+    "body": [
+      "from typing import Dict, Any, Optional",
+      "import structlog",
+      "",
+      "logger = structlog.get_logger(__name__)",
+      "",
+      "",
+      "class ${1:ServiceName}:",
+      "    \"\"\"${2:Service description}\"\"\"",
+      "    ",
+      "    def __init__(self):",
+      "        self.is_running = False",
+      "    ",
+      "    async def start(self) -> None:",
+      "        \"\"\"Start the service\"\"\"",
+      "        try:",
+      "            self.is_running = True",
+      "            logger.info(\"✅ ${1:ServiceName} started\")",
+      "        except Exception as e:",
+      "            logger.error(\"❌ Failed to start ${1:ServiceName}\", error=str(e))",
+      "            raise",
+      "    ",
+      "    async def stop(self) -> None:",
+      "        \"\"\"Stop the service\"\"\"",
+      "        self.is_running = False",
+      "        logger.info(\"🛑 ${1:ServiceName} stopped\")",
+      "    ",
+      "    async def health_check(self) -> Dict[str, Any]:",
+      "        \"\"\"Health check for monitoring\"\"\"",
+      "        return {",
+      "            \"status\": \"healthy\" if self.is_running else \"unhealthy\",",
+      "            \"is_running\": self.is_running",
+      "        }"
+    ],
+    "description": "Create a FastAPI service class template"
+  },
+
+  "Async Function with Logging": {
+    "prefix": "async-func-log",
+    "body": [
+      "async def ${1:function_name}(self, ${2:parameters}) -> ${3:ReturnType}:",
+      "    \"\"\"${4:Function description}\"\"\"",
+      "    try:",
+      "        logger.debug(\"${1:function_name} called\", ${5:context})",
+      "        ",
+      "        ${6:# Implementation}",
+      "        ",
+      "        logger.info(\"${1:function_name} completed successfully\")",
+      "        return ${7:result}",
+      "    ",
+      "    except Exception as e:",
+      "        logger.error(\"Error in ${1:function_name}\", error=str(e))",
+      "        raise"
+    ],
+    "description": "Create async function with logging"
+  },
+
+  "Pydantic Model": {
+    "prefix": "pydantic-model",
+    "body": [
+      "from pydantic import BaseModel, Field",
+      "from typing import Optional",
+      "from datetime import datetime",
+      "",
+      "",
+      "class ${1:ModelName}(BaseModel):",
+      "    \"\"\"${2:Model description}\"\"\"",
+      "    ",
+      "    ${3:field_name}: ${4:str} = Field(..., description=\"${5:Field description}\")",
+      "    created_at: datetime = Field(default_factory=datetime.utcnow)",
+      "    ",
+      "    class Config:",
+      "        json_encoders = {",
+      "            datetime: lambda v: v.isoformat()",
+      "        }"
+    ],
+    "description": "Create a Pydantic model"
+  },
+
+  "SQLAlchemy Model": {
+    "prefix": "sqlalchemy-model",
+    "body": [
+      "from sqlalchemy import Column, String, DateTime, Boolean, Integer",
+      "from sqlalchemy.ext.declarative import declarative_base",
+      "from datetime import datetime",
+      "",
+      "Base = declarative_base()",
+      "",
+      "",
+      "class ${1:ModelName}(Base):",
+      "    \"\"\"${2:Model description}\"\"\"",
+      "    __tablename__ = \"${3:table_name}\"",
+      "    ",
+      "    id = Column(Integer, primary_key=True, index=True)",
+      "    ${4:field_name} = Column(${5:String(100)}, nullable=False)",
+      "    created_at = Column(DateTime, default=datetime.utcnow)",
+      "    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)"
+    ],
+    "description": "Create a SQLAlchemy model"
+  },
+
+  "FastAPI Route": {
+    "prefix": "fastapi-route",
+    "body": [
+      "@router.${1:get}(\"${2:/endpoint}\")",
+      "async def ${3:endpoint_name}(${4:parameters}) -> ${5:ResponseType}:",
+      "    \"\"\"${6:Endpoint description}\"\"\"",
+      "    try:",
+      "        logger.info(\"${3:endpoint_name} called\")",
+      "        ",
+      "        ${7:# Implementation}",
+      "        ",
+      "        return ${8:response}",
+      "    ",
+      "    except Exception as e:",
+      "        logger.error(\"Error in ${3:endpoint_name}\", error=str(e))",
+      "        raise HTTPException(status_code=500, detail=str(e))"
+    ],
+    "description": "Create a FastAPI route"
+  },
+
+  "Test Function": {
+    "prefix": "test-async",
+    "body": [
+      "@pytest.mark.asyncio",
+      "async def test_${1:function_name}(${2:fixtures}):",
+      "    \"\"\"Test ${3:description}\"\"\"",
+      "    # Arrange",
+      "    ${4:setup}",
+      "    ",
+      "    # Act",
+      "    ${5:result} = await ${6:function_call}",
+      "    ",
+      "    # Assert",
+      "    assert ${7:assertion}"
+    ],
+    "description": "Create an async test function"
+  },
+
+  "WhatsApp Message Handler": {
+    "prefix": "whatsapp-handler",
+    "body": [
+      "async def handle_${1:message_type}(self, message: Dict[str, Any]) -> str:",
+      "    \"\"\"Handle ${1:message_type} messages\"\"\"",
+      "    try:",
+      "        user_phone = message.get('from')",
+      "        message_text = message.get('text', '')",
+      "        ",
+      "        logger.info(\"Handling ${1:message_type} message\", ",
+      "                   user=user_phone, message=message_text)",
+      "        ",
+      "        # Get or create user session",
+      "        session = await self.user_service.get_or_create_session(user_phone)",
+      "        ",
+      "        ${2:# Message processing logic}",
+      "        ",
+      "        return ${3:response}",
+      "    ",
+      "    except Exception as e:",
+      "        logger.error(\"Error handling ${1:message_type} message\", error=str(e))",
+      "        return \"❌ Sorry, I encountered an error processing your message.\""
+    ],
+    "description": "Create a WhatsApp message handler"
+  }
+}

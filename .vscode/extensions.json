@@ -1,0 +1,56 @@
+{
+    "recommendations": [
+        // Python Development
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "ms-python.black-formatter",
+        "ms-python.flake8",
+        "ms-python.mypy-type-checker",
+        "ms-python.debugpy",
+
+        // Testing
+        "ms-toolsai.datawrangler",
+        "littlefoxteam.vscode-python-test-adapter",
+
+        // Jupyter/Notebooks
+        "ms-toolsai.jupyter",
+        "ms-toolsai.jupyter-renderers",
+
+        // Code Quality
+        "donjayamanne.python-environment-manager",
+        "njpwerner.autodocstring",
+
+        // Git
+        "eamodio.gitlens",
+
+        // Docker
+        "ms-azuretools.vscode-docker",
+
+        // API Development
+        "humao.rest-client",
+        "rangav.vscode-thunder-client",
+
+        // Environment Files
+        "mikestead.dotenv",
+
+        // YAML/JSON
+        "redhat.vscode-yaml",
+        "esbenp.prettier-vscode",
+
+        // GitHub
+        "github.vscode-pull-request-github",
+        "github.vscode-github-actions",
+
+        // Productivity
+        "ms-vscode.vscode-json",
+        "visualstudioexptteam.vscodeintellicode",
+        "ms-vscode.live-server",
+
+        // Documentation
+        "yzhang.markdown-all-in-one",
+        "davidanson.vscode-markdownlint",
+
+        // Theme (Optional)
+        "github.github-vscode-theme"
+    ]
+}

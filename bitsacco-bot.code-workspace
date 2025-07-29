@@ -1,0 +1,77 @@
+{
+    "folders": [
+        {
+            "name": "Bitsacco WhatsApp Bot",
+            "path": "."
+        }
+    ],
+    "settings": {
+        "files.associations": {
+            "*.env*": "dotenv",
+            "Dockerfile*": "dockerfile",
+            "*.yml": "yaml",
+            "*.yaml": "yaml"
+        },
+        "search.exclude": {
+            "**/.git": true,
+            "**/.DS_Store": true,
+            "**/node_modules": true,
+            "**/bower_components": true,
+            "**/__pycache__": true,
+            "**/.pytest_cache": true,
+            "**/.mypy_cache": true,
+            "**/.coverage": true,
+            "**/htmlcov": true,
+            "**/.venv": true,
+            "**/venv": true,
+            "**/env": true
+        },
+        "files.watcherExclude": {
+            "**/.git/objects/**": true,
+            "**/.git/subtree-cache/**": true,
+            "**/node_modules/*/**": true,
+            "**/__pycache__/**": true,
+            "**/.pytest_cache/**": true,
+            "**/.mypy_cache/**": true
+        }
+    },
+    "extensions": {
+        "recommendations": [
+            "ms-python.python",
+            "ms-python.pylint",
+            "ms-python.black-formatter",
+            "ms-python.flake8",
+            "ms-python.mypy-type-checker",
+            "ms-toolsai.jupyter",
+            "ms-vscode.test-adapter-converter",
+            "littlefoxteam.vscode-python-test-adapter",
+            "ms-vscode.vscode-json",
+            "redhat.vscode-yaml",
+            "ms-azuretools.vscode-docker",
+            "eamodio.gitlens",
+            "ms-vscode.vscode-typescript-next",
+            "bradlc.vscode-tailwindcss",
+            "esbenp.prettier-vscode",
+            "ms-vscode.vscode-eslint",
+            "humao.rest-client",
+            "ms-vscode.hexeditor",
+            "streetsidesoftware.code-spell-checker",
+            "gruntfuggly.todo-tree",
+            "alefragnani.bookmarks",
+            "ms-vscode.vscode-github-issue-notebook",
+            "github.vscode-pull-request-github",
+            "github.copilot",
+            "github.copilot-chat"
+        ]
+    },
+    "tasks": {
+        "version": "2.0.0",
+        "options": {
+            "cwd": "${workspaceFolder}"
+        }
+    },
+    "launch": {
+        "version": "0.2.0",
+        "configurations": []
+    }
+}
