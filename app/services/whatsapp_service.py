@@ -24,7 +24,6 @@ from .bitsacco_api import BitsaccoAPIClient
 from .ai_service import AIConversationService
 from .user_service import UserService
 from .bitcoin_service import BitcoinPriceService
-from .voice_service import VoiceService
 
 logger = structlog.get_logger(__name__)
 
@@ -32,7 +31,6 @@ logger = structlog.get_logger(__name__)
 @dataclass
 class WhatsAppMessage:
     """WhatsApp message structure"""
-
     id: str
     sender: str
     content: str
@@ -50,14 +48,12 @@ class WhatsAppService:
         bitsacco_api: BitsaccoAPIClient,
         ai_service: AIConversationService,
         user_service: UserService,
-        bitcoin_service: BitcoinPriceService,
-        voice_service: Optional[VoiceService] = None,
+        bitcoin_service: BitcoinPriceService
     ):
         self.bitsacco_api = bitsacco_api
         self.ai_service = ai_service
         self.user_service = user_service
         self.bitcoin_service = bitcoin_service
-        self.voice_service = voice_service
 
         self.driver: Optional[webdriver.Chrome] = None
         self.is_ready = False
@@ -69,12 +65,9 @@ class WhatsAppService:
         self.stats = {
             "messages_processed": 0,
             "messages_sent": 0,
-            "messages_received": 0,
-            "voice_messages_processed": 0,
-            "voice_responses_sent": 0,
             "active_sessions": 0,
             "errors": 0,
-            "start_time": None,
+            "start_time": None
         }
 
     async def initialize(self) -> None:
@@ -90,9 +83,7 @@ class WhatsAppService:
             chrome_options.add_argument("--disable-dev-shm-usage")
             chrome_options.add_argument("--disable-gpu")
             chrome_options.add_argument("--window-size=1920,1080")
-            chrome_options.add_argument(
-                "--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
-            )
+            chrome_options.add_argument("--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
 
             # User data directory for session persistence
             user_data_dir = settings.DATA_DIR / "whatsapp-session"
@@ -101,10 +92,8 @@ class WhatsAppService:
 
             # Initialize driver
             self.driver = webdriver.Chrome(
-                service=webdriver.chrome.service.Service(
-                    ChromeDriverManager().install()
-                ),
-                options=chrome_options,
+                service=webdriver.chrome.service.Service(ChromeDriverManager().install()),
+                options=chrome_options
             )
 
             # Navigate to WhatsApp Web
@@ -141,27 +130,19 @@ class WhatsAppService:
             # Check if already logged in
             wait.until(
                 EC.any_of(
-                    EC.presence_of_element_located(
-                        (By.CSS_SELECTOR, "[data-testid='chat-list']")
-                    ),
-                    EC.presence_of_element_located(
-                        (By.CSS_SELECTOR, "canvas[aria-label='Scan me!']")
-                    ),
+                    EC.presence_of_element_located((By.CSS_SELECTOR, "[data-testid='chat-list']")),
+                    EC.presence_of_element_located((By.CSS_SELECTOR, "canvas[aria-label='Scan me!']"))
                 )
             )
 
             # If QR code is present, inform user
-            qr_elements = self.driver.find_elements(
-                By.CSS_SELECTOR, "canvas[aria-label='Scan me!']"
-            )
+            qr_elements = self.driver.find_elements(By.CSS_SELECTOR, "canvas[aria-label='Scan me!']")
             if qr_elements:
                 logger.info("📱 Please scan the QR code in WhatsApp Web to continue")
 
                 # Wait for login completion
                 wait.until(
-                    EC.presence_of_element_located(
-                        (By.CSS_SELECTOR, "[data-testid='chat-list']")
-                    )
+                    EC.presence_of_element_located((By.CSS_SELECTOR, "[data-testid='chat-list']"))
                 )
 
             logger.info("✅ WhatsApp login successful")
@@ -210,7 +191,7 @@ class WhatsAppService:
             # Find unread chat elements
             unread_chats = self.driver.find_elements(
                 By.CSS_SELECTOR,
-                "[data-testid='cell-frame-container'] [data-testid='unread-count']",
+                "[data-testid='cell-frame-container'] [data-testid='unread-count']"
             )
 
             for chat_element in unread_chats[:5]:  # Limit to 5 chats at a time
@@ -239,12 +220,8 @@ class WhatsAppService:
 
         try:
             # Get chat info
-            chat_header = self.driver.find_element(
-                By.CSS_SELECTOR, "[data-testid='conversation-header']"
-            )
-            chat_name = chat_header.find_element(
-                By.CSS_SELECTOR, "[data-testid='conversation-info-header-chat-title']"
-            ).text
+            chat_header = self.driver.find_element(By.CSS_SELECTOR, "[data-testid='conversation-header']")
+            chat_name = chat_header.find_element(By.CSS_SELECTOR, "[data-testid='conversation-info-header-chat-title']").text
 
             # Skip group chats for now
             if "participants" in chat_name.lower() or len(chat_name.split()) > 2:
@@ -252,7 +229,8 @@ class WhatsAppService:
 
             # Get recent messages
             message_elements = self.driver.find_elements(
-                By.CSS_SELECTOR, "[data-testid='msg-container']"
+                By.CSS_SELECTOR,
+                "[data-testid='msg-container']"
             )
 
             # Process last 5 messages
@@ -270,22 +248,11 @@ class WhatsAppService:
 
         return messages
 
-    def _parse_message_element(
-        self, element, chat_name: str
-    ) -> Optional[WhatsAppMessage]:
-        """Parse individual message element including voice messages"""
+    def _parse_message_element(self, element, chat_name: str) -> Optional[WhatsAppMessage]:
+        """Parse individual message element"""
         try:
-            # Check for voice message first
-            voice_elements = element.find_elements(
-                By.CSS_SELECTOR, "[data-testid='audio-download']"
-            )
-            if voice_elements:
-                return self._parse_voice_message(element, chat_name)
-
             # Get message text
-            text_elements = element.find_elements(
-                By.CSS_SELECTOR, "[data-testid='conversation-text']"
-            )
+            text_elements = element.find_elements(By.CSS_SELECTOR, "[data-testid='conversation-text']")
             if not text_elements:
                 return None
 
@@ -294,14 +261,8 @@ class WhatsAppService:
                 return None
 
             # Get timestamp
-            time_elements = element.find_elements(
-                By.CSS_SELECTOR, "[data-testid='msg-meta'] span"
-            )
-            timestamp_str = (
-                time_elements[0].text
-                if time_elements
-                else datetime.utcnow().strftime("%H:%M")
-            )
+            time_elements = element.find_elements(By.CSS_SELECTOR, "[data-testid='msg-meta'] span")
+            timestamp_str = time_elements[0].text if time_elements else datetime.utcnow().strftime("%H:%M")
 
             # Generate message ID
             message_id = f"{chat_name}_{hash(content)}_{timestamp_str}"
@@ -311,76 +272,30 @@ class WhatsAppService:
                 sender=chat_name,
                 content=content,
                 timestamp=datetime.utcnow(),
-                message_type="text",
+                message_type="text"
             )
 
         except Exception as e:
             logger.debug("Error parsing message element", error=str(e))
             return None
 
-    def _parse_voice_message(
-        self, element, chat_name: str
-    ) -> Optional[WhatsAppMessage]:
-        """Parse voice message element"""
-        try:
-            # Get voice message duration or audio element
-            audio_elements = element.find_elements(
-                By.CSS_SELECTOR, "[data-testid='audio-download'], .audio-play"
-            )
-            if not audio_elements:
-                return None
-
-            # Get timestamp
-            time_elements = element.find_elements(
-                By.CSS_SELECTOR, "[data-testid='msg-meta'] span"
-            )
-            timestamp_str = (
-                time_elements[0].text
-                if time_elements
-                else datetime.utcnow().strftime("%H:%M")
-            )
-
-            # Generate message ID for voice
-            message_id = f"{chat_name}_voice_{timestamp_str}_{int(time.time())}"
-
-            return WhatsAppMessage(
-                id=message_id,
-                sender=chat_name,
-                content="[Voice Message]",
-                timestamp=datetime.utcnow(),
-                message_type="voice",
-                media_url=None,  # Will be populated when downloading
-            )
-
-        except Exception as e:
-            logger.debug("Error parsing voice message", error=str(e))
-            return None
-
     def _is_own_message(self, element) -> bool:
         """Check if message is sent by us"""
         try:
             # Messages we sent have different styling
-            outgoing_indicators = element.find_elements(
-                By.CSS_SELECTOR, "[data-testid='msg-meta'] [data-icon='msg-check']"
-            )
+            outgoing_indicators = element.find_elements(By.CSS_SELECTOR, "[data-testid='msg-meta'] [data-icon='msg-check']")
             return len(outgoing_indicators) > 0
         except:
             return False
 
     async def _handle_message(self, message: WhatsAppMessage) -> None:
-        """Process incoming WhatsApp message including voice messages"""
+        """Process incoming WhatsApp message"""
         try:
             logger.info(
                 "📨 Processing message",
                 sender=self._mask_phone(message.sender),
-                content_length=len(message.content),
-                message_type=message.message_type,
+                content_length=len(message.content)
             )
-
-            # Handle voice messages
-            if message.message_type == "voice":
-                await self._handle_voice_message(message)
-                return
 
             # Get or create user session
             session = await self._get_user_session(message.sender)
@@ -391,21 +306,18 @@ class WhatsAppService:
                 phone_number=self._extract_phone_number(message.sender),
                 message_type=message.message_type,
                 timestamp=message.timestamp,
-                is_group=False,
+                is_group=False
             )
 
-            # Process text message based on session state
-            welcome_triggers = ["/start", "hi", "hello", "mambo"]
-            if session.state == "init" or message.content.lower() in welcome_triggers:
+            # Process message based on session state
+            if session.state == "init" or message.content.lower() in ["/start", "hi", "hello", "mambo"]:
                 await self._handle_welcome(message.sender, session)
             elif session.state == "awaiting_phone":
                 await self._handle_phone_input(message.sender, message.content, session)
             elif session.state == "awaiting_otp":
                 await self._handle_otp_input(message.sender, message.content, session)
             elif session.state == "authenticated":
-                await self._handle_authenticated_message(
-                    message.sender, message.content, session, context
-                )
+                await self._handle_authenticated_message(message.sender, message.content, session, context)
             else:
                 await self._send_help_message(message.sender)
 
@@ -429,66 +341,10 @@ class WhatsAppService:
                     user_id=user_id,
                     state="init",
                     created_at=datetime.utcnow(),
-                    last_activity=datetime.utcnow(),
+                    last_activity=datetime.utcnow()
                 )
 
         return self.user_sessions[user_id]
-
-    async def _handle_voice_message(self, message: WhatsAppMessage) -> None:
-        """Handle incoming voice message with speech processing"""
-        try:
-            logger.info(
-                "🎵 Processing voice message", sender=self._mask_phone(message.sender)
-            )
-
-            # Check if voice service is available
-            if not self.voice_service:
-                await self._send_message(
-                    message.sender,
-                    "Voice messages are currently not supported. "
-                    "Please send text messages.",
-                )
-                return
-
-            # Get user session
-            session = await self._get_user_session(message.sender)
-
-            # Voice messages only supported for authenticated users
-            if session.state != "authenticated":
-                await self._send_message(
-                    message.sender,
-                    "Please complete registration first before sending "
-                    "voice messages. Type 'hi' to start.",
-                )
-                return
-
-            # Update stats
-            self.stats["voice_messages_processed"] = (
-                self.stats.get("voice_messages_processed", 0) + 1
-            )
-
-            # TODO: Download and process voice message
-            # This would require additional selenium automation to:
-            # 1. Click on voice message to play/download
-            # 2. Extract audio file
-            # 3. Process with voice service
-
-            # For now, acknowledge receipt
-            await self._send_message(
-                message.sender,
-                "🎵 Voice message received! Voice processing will be "
-                "available soon. Please send text messages for now.",
-            )
-
-        except Exception as e:
-            logger.error(
-                "Error processing voice message", error=str(e), sender=message.sender
-            )
-            await self._send_message(
-                message.sender,
-                "Sorry, I couldn't process your voice message. "
-                "Please try sending a text message.",
-            )
 
     async def _handle_welcome(self, user_id: str, session: UserSession) -> None:
         """Handle welcome message and phone number request"""
@@ -505,9 +361,7 @@ _Your phone number must be registered with Bitsacco.com_
         await self._send_message(user_id, welcome_msg)
         session.state = "awaiting_phone"
 
-    async def _handle_phone_input(
-        self, user_id: str, phone: str, session: UserSession
-    ) -> None:
+    async def _handle_phone_input(self, user_id: str, phone: str, session: UserSession) -> None:
         """Handle phone number input and OTP request"""
         # Normalize phone number
         normalized_phone = self._normalize_phone_number(phone)
@@ -515,7 +369,7 @@ _Your phone number must be registered with Bitsacco.com_
         if not self._is_valid_phone_number(normalized_phone):
             await self._send_message(
                 user_id,
-                "❌ Please enter a valid phone number with country code (e.g., +254700123456)",
+                "❌ Please enter a valid phone number with country code (e.g., +254700123456)"
             )
             return
 
@@ -526,7 +380,7 @@ _Your phone number must be registered with Bitsacco.com_
             if not user_data.get("exists", True):
                 await self._send_message(
                     user_id,
-                    f"❌ No Bitsacco account found for {normalized_phone}.\n\nPlease register at https://bitsacco.com first.",
+                    f"❌ No Bitsacco account found for {normalized_phone}.\n\nPlease register at https://bitsacco.com first."
                 )
                 return
 
@@ -536,27 +390,21 @@ _Your phone number must be registered with Bitsacco.com_
             if otp_result.get("success"):
                 await self._send_message(
                     user_id,
-                    f"📱 OTP sent to {normalized_phone}\n\nPlease enter the 6-digit code:",
+                    f"📱 OTP sent to {normalized_phone}\n\nPlease enter the 6-digit code:"
                 )
                 session.state = "awaiting_otp"
                 session.phone_number = normalized_phone
             else:
-                await self._send_message(
-                    user_id, "❌ Failed to send OTP. Please try again."
-                )
+                await self._send_message(user_id, "❌ Failed to send OTP. Please try again.")
 
         except Exception as e:
             logger.error("Error in phone input handling", error=str(e))
-            await self._send_message(
-                user_id, "❌ Error verifying phone number. Please try again."
-            )
+            await self._send_message(user_id, "❌ Error verifying phone number. Please try again.")
 
-    async def _handle_otp_input(
-        self, user_id: str, otp: str, session: UserSession
-    ) -> None:
+    async def _handle_otp_input(self, user_id: str, otp: str, session: UserSession) -> None:
         """Handle OTP verification"""
         # Extract digits only
-        otp_digits = "".join(filter(str.isdigit, otp))
+        otp_digits = ''.join(filter(str.isdigit, otp))
 
         if len(otp_digits) != 6:
             await self._send_message(user_id, "❌ Please enter a valid 6-digit OTP")
@@ -564,9 +412,7 @@ _Your phone number must be registered with Bitsacco.com_
 
         try:
             # Verify OTP with Bitsacco
-            verify_result = await self.bitsacco_api.verify_otp(
-                session.phone_number, otp_digits
-            )
+            verify_result = await self.bitsacco_api.verify_otp(session.phone_number, otp_digits)
 
             if verify_result.get("success"):
                 session.state = "authenticated"
@@ -595,12 +441,14 @@ What would you like to do?
 
         except Exception as e:
             logger.error("Error in OTP verification", error=str(e))
-            await self._send_message(
-                user_id, "❌ Error verifying OTP. Please try again."
-            )
+            await self._send_message(user_id, "❌ Error verifying OTP. Please try again.")
 
     async def _handle_authenticated_message(
-        self, user_id: str, content: str, session: UserSession, context: MessageContext
+        self,
+        user_id: str,
+        content: str,
+        session: UserSession,
+        context: MessageContext
     ) -> None:
         """Handle messages from authenticated users"""
         content_lower = content.lower().strip()
@@ -650,35 +498,25 @@ What would you like to do?
 
                 await self._send_message(user_id, balance_msg)
             else:
-                await self._send_message(
-                    user_id, "❌ Unable to fetch balance. Please try again."
-                )
+                await self._send_message(user_id, "❌ Unable to fetch balance. Please try again.")
 
         except Exception as e:
             logger.error("Error fetching balance", error=str(e))
-            await self._send_message(
-                user_id, "❌ Error fetching balance. Please try again."
-            )
+            await self._send_message(user_id, "❌ Error fetching balance. Please try again.")
 
-    async def _handle_save_command(
-        self, user_id: str, content: str, session: UserSession
-    ) -> None:
+    async def _handle_save_command(self, user_id: str, content: str, session: UserSession) -> None:
         """Handle Bitcoin savings command"""
         try:
             # Extract amount
             amount_str = content.lower().replace("save", "").strip()
-            amount = float(
-                "".join(filter(lambda x: x.isdigit() or x == ".", amount_str))
-            )
+            amount = float(''.join(filter(lambda x: x.isdigit() or x == '.', amount_str)))
 
             if amount < 100:
                 await self._send_message(user_id, "❌ Minimum savings amount is KES 100")
                 return
 
             if amount > 50000:
-                await self._send_message(
-                    user_id, "❌ Maximum single savings amount is KES 50,000"
-                )
+                await self._send_message(user_id, "❌ Maximum single savings amount is KES 50,000")
                 return
 
             # Initiate Bitcoin savings
@@ -701,15 +539,10 @@ Please complete the M-Pesa payment to confirm your Bitcoin savings.
 
                 await self._send_message(user_id, save_msg)
             else:
-                await self._send_message(
-                    user_id,
-                    f"❌ {save_result.get('message', 'Failed to initiate savings')}",
-                )
+                await self._send_message(user_id, f"❌ {save_result.get('message', 'Failed to initiate savings')}")
 
         except ValueError:
-            await self._send_message(
-                user_id, "❌ Please enter a valid amount (e.g., 'save 1000')"
-            )
+            await self._send_message(user_id, "❌ Please enter a valid amount (e.g., 'save 1000')")
         except Exception as e:
             logger.error("Error in save command", error=str(e))
             await self._send_message(user_id, "❌ Error processing savings request.")
@@ -717,9 +550,7 @@ Please complete the M-Pesa payment to confirm your Bitcoin savings.
     async def _handle_history_command(self, user_id: str, session: UserSession) -> None:
         """Handle transaction history request"""
         try:
-            history_data = await self.bitsacco_api.get_transaction_history(
-                session.bitsacco_user_id
-            )
+            history_data = await self.bitsacco_api.get_transaction_history(session.bitsacco_user_id)
 
             if history_data.get("success") and history_data.get("transactions"):
                 transactions = history_data["transactions"][:5]  # Last 5 transactions
@@ -752,7 +583,11 @@ Please complete the M-Pesa payment to confirm your Bitcoin savings.
             await self._send_message(user_id, "❌ Error fetching Bitcoin price.")
 
     async def _handle_ai_conversation(
-        self, user_id: str, content: str, session: UserSession, context: MessageContext
+        self,
+        user_id: str,
+        content: str,
+        session: UserSession,
+        context: MessageContext
     ) -> None:
         """Handle AI-powered conversation"""
         try:
@@ -772,63 +607,33 @@ Please complete the M-Pesa payment to confirm your Bitcoin savings.
             logger.error("Error in AI conversation", error=str(e))
             await self._send_help_message(user_id)
 
-    async def _send_message(
-        self, user_id: str, message: str, send_voice: bool = False
-    ) -> None:
-        """Send message to WhatsApp user with optional voice response"""
-        try:
-            # Generate voice response if requested and service available
-            if send_voice and self.voice_service:
-                try:
-                    await self._send_voice_response(user_id, message)
-                    return
-                except Exception as e:
-                    logger.warning("Voice response failed, sending text", error=str(e))
-
-            # Send text message
-            await self._send_text_message(user_id, message)
-
-        except Exception as e:
-            logger.error("Error sending message", error=str(e), user_id=user_id)
-
-    async def _send_text_message(self, user_id: str, message: str) -> None:
-        """Send text message to WhatsApp user"""
+    async def _send_message(self, user_id: str, message: str) -> None:
+        """Send message to WhatsApp user"""
         try:
             # Find and open chat
-            search_box = self.driver.find_element(
-                By.CSS_SELECTOR, "[data-testid='chat-list-search']"
-            )
+            search_box = self.driver.find_element(By.CSS_SELECTOR, "[data-testid='chat-list-search']")
             search_box.clear()
             search_box.send_keys(user_id)
             await asyncio.sleep(1)
 
             # Click on first chat result
-            chat_result = self.driver.find_element(
-                By.CSS_SELECTOR, "[data-testid='cell-frame-container']"
-            )
+            chat_result = self.driver.find_element(By.CSS_SELECTOR, "[data-testid='cell-frame-container']")
             chat_result.click()
             await asyncio.sleep(0.5)
 
             # Type message
-            message_box = self.driver.find_element(
-                By.CSS_SELECTOR, "[data-testid='conversation-compose-box-input']"
-            )
+            message_box = self.driver.find_element(By.CSS_SELECTOR, "[data-testid='conversation-compose-box-input']")
             message_box.clear()
 
             # Handle multi-line messages
-            lines = message.split("\n")
+            lines = message.split('\n')
             for i, line in enumerate(lines):
                 message_box.send_keys(line)
                 if i < len(lines) - 1:
-                    message_box.send_keys(
-                        webdriver.common.keys.Keys.SHIFT
-                        + webdriver.common.keys.Keys.ENTER
-                    )
+                    message_box.send_keys(webdriver.common.keys.Keys.SHIFT + webdriver.common.keys.Keys.ENTER)
 
             # Send message
-            send_button = self.driver.find_element(
-                By.CSS_SELECTOR, "[data-testid='send']"
-            )
+            send_button = self.driver.find_element(By.CSS_SELECTOR, "[data-testid='send']")
             send_button.click()
 
             self.stats["messages_sent"] += 1
@@ -836,39 +641,6 @@ Please complete the M-Pesa payment to confirm your Bitcoin savings.
 
         except Exception as e:
             logger.error("Error sending message", error=str(e), recipient=user_id)
-
-    async def _send_voice_response(self, user_id: str, text_message: str) -> None:
-        """Send voice response using ElevenLabs TTS"""
-        try:
-            # Generate voice from text
-            audio_data = await self.voice_service.text_to_speech(
-                text_message, voice_id="default"
-            )
-
-            if not audio_data:
-                raise Exception("Failed to generate voice response")
-
-            # TODO: Implement voice message sending via WhatsApp Web
-            # This would require:
-            # 1. Save audio to temporary file
-            # 2. Use selenium to upload and send voice message
-            # 3. Clean up temporary file
-
-            # For now, log the attempt and fall back to text
-            logger.info(
-                "Voice response generated but sending not implemented",
-                user_id=user_id,
-                text_length=len(text_message),
-            )
-
-            # Fall back to text message
-            await self._send_text_message(user_id, text_message)
-
-        except Exception as e:
-            logger.error(
-                "Error generating voice response", error=str(e), user_id=user_id
-            )
-            raise
             raise
 
     async def _send_help_message(self, user_id: str) -> None:
@@ -897,12 +669,12 @@ Example: "How much Bitcoin do I have?" or "I want to save 500 shillings"
     def _normalize_phone_number(self, phone: str) -> str:
         """Normalize phone number to international format"""
         # Remove all non-digits
-        digits = "".join(filter(str.isdigit, phone))
+        digits = ''.join(filter(str.isdigit, phone))
 
         # Handle Kenyan numbers
-        if digits.startswith("254"):
+        if digits.startswith('254'):
             return f"+{digits}"
-        elif digits.startswith("0") and len(digits) == 10:
+        elif digits.startswith('0') and len(digits) == 10:
             return f"+254{digits[1:]}"
         elif len(digits) == 9:
             return f"+254{digits}"
@@ -911,7 +683,7 @@ Example: "How much Bitcoin do I have?" or "I want to save 500 shillings"
 
     def _is_valid_phone_number(self, phone: str) -> bool:
         """Validate phone number format"""
-        if not phone.startswith("+"):
+        if not phone.startswith('+'):
             return False
 
         digits = phone[1:]
@@ -920,7 +692,7 @@ Example: "How much Bitcoin do I have?" or "I want to save 500 shillings"
     def _extract_phone_number(self, chat_name: str) -> Optional[str]:
         """Extract phone number from chat name if possible"""
         # WhatsApp shows phone numbers for unsaved contacts
-        if "+" in chat_name and any(c.isdigit() for c in chat_name):
+        if '+' in chat_name and any(c.isdigit() for c in chat_name):
             return self._normalize_phone_number(chat_name)
         return None
 
@@ -935,14 +707,11 @@ Example: "How much Bitcoin do I have?" or "I want to save 500 shillings"
         while self.is_running:
             try:
                 current_time = datetime.utcnow()
-                timeout_threshold = current_time - timedelta(
-                    seconds=settings.SESSION_TIMEOUT
-                )
+                timeout_threshold = current_time - timedelta(seconds=settings.SESSION_TIMEOUT)
 
                 # Remove expired sessions
                 expired_sessions = [
-                    user_id
-                    for user_id, session in self.user_sessions.items()
+                    user_id for user_id, session in self.user_sessions.items()
                     if session.last_activity < timeout_threshold
                 ]
 
@@ -950,9 +719,7 @@ Example: "How much Bitcoin do I have?" or "I want to save 500 shillings"
                     del self.user_sessions[user_id]
 
                 if expired_sessions:
-                    logger.info(
-                        f"🧹 Cleaned up {len(expired_sessions)} expired sessions"
-                    )
+                    logger.info(f"🧹 Cleaned up {len(expired_sessions)} expired sessions")
 
                 await asyncio.sleep(settings.SESSION_CLEANUP_INTERVAL)
 
@@ -967,9 +734,7 @@ Example: "How much Bitcoin do I have?" or "I want to save 500 shillings"
                 # Check if WhatsApp Web is still responsive
                 if self.driver:
                     # Try to find chat list to verify connection
-                    chat_list = self.driver.find_elements(
-                        By.CSS_SELECTOR, "[data-testid='chat-list']"
-                    )
+                    chat_list = self.driver.find_elements(By.CSS_SELECTOR, "[data-testid='chat-list']")
                     if not chat_list:
                         logger.warning("⚠️ WhatsApp Web connection may be lost")
 
@@ -989,9 +754,8 @@ Example: "How much Bitcoin do I have?" or "I want to save 500 shillings"
             "stats": self.stats.copy(),
             "uptime_seconds": (
                 (datetime.utcnow() - self.stats["start_time"]).total_seconds()
-                if self.stats["start_time"]
-                else 0
-            ),
+                if self.stats["start_time"] else 0
+            )
         }
 
     async def stop(self) -> None:

@@ -19,7 +19,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 import enum
 
-from ..models.user import SessionState
+from ..models.user import UserState
 
 Base = declarative_base()
 
@@ -36,7 +36,7 @@ class UserSessionModel(Base):
 
     # Authentication
     is_authenticated = Column(Boolean, default=False)
-    current_state = Column(SQLEnum(SessionState), default=SessionState.INIT)
+    current_state = Column(SQLEnum(UserState), default=UserState.INITIAL)
 
     # Timestamps
     created_at = Column(DateTime, default=datetime.utcnow)
