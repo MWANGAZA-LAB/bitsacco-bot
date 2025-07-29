@@ -12,6 +12,7 @@ from enum import Enum
 
 class SessionState(str, Enum):
     """User session states"""
+
     INIT = "init"
     AWAITING_PHONE = "awaiting_phone"
     AWAITING_OTP = "awaiting_otp"
@@ -22,6 +23,7 @@ class SessionState(str, Enum):
 
 class MessageType(str, Enum):
     """WhatsApp message types"""
+
     TEXT = "text"
     IMAGE = "image"
     AUDIO = "audio"
@@ -35,6 +37,7 @@ class MessageType(str, Enum):
 @dataclass
 class UserSession:
     """User session data"""
+
     user_id: str
     state: SessionState
     created_at: datetime
@@ -43,24 +46,24 @@ class UserSession:
     bitsacco_user_id: Optional[str] = None
     context_data: Dict[str, Any] = None
     conversation_history: List[str] = None
-    
+
     def __post_init__(self):
         if self.context_data is None:
             self.context_data = {}
         if self.conversation_history is None:
             self.conversation_history = []
-    
+
     def add_to_history(self, message: str, max_length: int = 10):
         """Add message to conversation history"""
         self.conversation_history.append(message)
         if len(self.conversation_history) > max_length:
             self.conversation_history = self.conversation_history[-max_length:]
-    
+
     def is_expired(self, timeout_seconds: int) -> bool:
         """Check if session is expired"""
         now = datetime.utcnow()
         return (now - self.last_activity).total_seconds() > timeout_seconds
-    
+
     def update_activity(self):
         """Update last activity timestamp"""
         self.last_activity = datetime.utcnow()
@@ -69,6 +72,7 @@ class UserSession:
 @dataclass
 class MessageContext:
     """Context information for WhatsApp messages"""
+
     user_id: str
     message_type: MessageType
     timestamp: datetime
@@ -82,6 +86,7 @@ class MessageContext:
 
 class UserProfile(BaseModel):
     """User profile information from Bitsacco"""
+
     user_id: str
     phone_number: str
     name: Optional[str] = None
@@ -95,6 +100,7 @@ class UserProfile(BaseModel):
 
 class WalletBalance(BaseModel):
     """Wallet balance information"""
+
     user_id: str
     btc_balance: float = 0.0
     kes_balance: float = 0.0
@@ -105,6 +111,7 @@ class WalletBalance(BaseModel):
 
 class Transaction(BaseModel):
     """Transaction record"""
+
     id: str
     user_id: str
     type: str  # deposit, withdrawal, transfer, etc.
@@ -121,6 +128,7 @@ class Transaction(BaseModel):
 
 class BitcoinPrice(BaseModel):
     """Bitcoin price information"""
+
     price_usd: float
     price_kes: float
     change_24h_usd: float
@@ -131,6 +139,7 @@ class BitcoinPrice(BaseModel):
 
 class AIResponse(BaseModel):
     """AI conversation response"""
+
     success: bool
     response: str
     intent: Optional[str] = None
@@ -141,6 +150,7 @@ class AIResponse(BaseModel):
 
 class APIResponse(BaseModel):
     """Generic API response wrapper"""
+
     success: bool
     data: Optional[Any] = None
     message: Optional[str] = None
@@ -150,6 +160,7 @@ class APIResponse(BaseModel):
 
 class WebhookEvent(BaseModel):
     """Webhook event from external services"""
+
     event_type: str
     source: str
     timestamp: datetime
@@ -159,6 +170,7 @@ class WebhookEvent(BaseModel):
 
 class ServiceHealth(BaseModel):
     """Service health status"""
+
     service_name: str
     status: str  # healthy, degraded, unhealthy
     last_check: datetime

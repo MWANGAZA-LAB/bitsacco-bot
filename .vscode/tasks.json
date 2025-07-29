@@ -140,8 +140,10 @@
 		{
 			"label": "Start Development Server",
 			"type": "shell",
-			"command": "uvicorn",
+			"command": "C:/Program Files/Python311/python.exe",
 			"args": [
+				"-m",
+				"uvicorn",
 				"app.main:app",
 				"--reload",
 				"--host",
@@ -187,6 +189,41 @@
 			],
 			"group": "build",
 			"isBackground": true,
+			"problemMatcher": []
+		},
+		{
+			"label": "Start Admin Dashboard",
+			"type": "shell",
+			"command": "npm",
+			"args": [
+				"run",
+				"dev"
+			],
+			"options": {
+				"cwd": "${workspaceFolder}/admin-dashboard"
+			},
+			"group": "build",
+			"isBackground": true,
+			"problemMatcher": [],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "new"
+			}
+		},
+		{
+			"label": "Install Dashboard Dependencies",
+			"type": "shell",
+			"command": "npm",
+			"args": [
+				"install"
+			],
+			"options": {
+				"cwd": "${workspaceFolder}/admin-dashboard"
+			},
+			"group": "build",
+			"isBackground": false,
 			"problemMatcher": []
 		}
 	]

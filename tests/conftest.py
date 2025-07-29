@@ -33,15 +33,15 @@ async def test_engine():
     engine = create_async_engine(
         TEST_DATABASE_URL,
         poolclass=StaticPool,
-        connect_args={"check_same_thread": False}
+        connect_args={"check_same_thread": False},
     )
-    
+
     # Create tables
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-    
+
     yield engine
-    
+
     await engine.dispose()
 
 
@@ -49,9 +49,7 @@ async def test_engine():
 async def test_session_maker(test_engine):
     """Create test session maker"""
     return async_sessionmaker(
-        bind=test_engine,
-        class_=AsyncSession,
-        expire_on_commit=False
+        bind=test_engine, class_=AsyncSession, expire_on_commit=False
     )
 
 
@@ -91,10 +89,10 @@ def mock_whatsapp_message():
                                     "from": "+254700000000",
                                     "text": {"body": "Hello"},
                                     "type": "text",
-                                    "timestamp": "1640995200"
+                                    "timestamp": "1640995200",
                                 }
                             ]
-                        }
+                        },
                     }
                 ]
             }
@@ -110,5 +108,5 @@ def mock_bitcoin_price():
         "price_kes": 6750000.00,
         "change_24h_usd": 2.5,
         "change_24h_kes": 2.5,
-        "source": "test"
+        "source": "test",
     }
