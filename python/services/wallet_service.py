@@ -40,17 +40,17 @@ class WalletService:
                     f"{self.api_base_url}/users/phone/{phone_number}",
                     headers={"Authorization": f"Bearer {self.api_key}"}
                 )
-                
+
                 if response.status_code == 200:
                     return response.json()
                 elif response.status_code == 404:
                     return {"exists": False, "message": "User not found"}
                 else:
                     response.raise_for_status()
-                    
+                    return {"exists": False, "message": "Unexpected error"}
         except Exception as e:
             logger.error(f"Failed to get user by phone: {e}")
-            raise
+            return {"exists": False, "message": f"Exception occurred: {str(e)}"}
     
     async def get_balance(self, phone_number: str) -> Dict[str, Any]:
         """Get wallet balance from Bitsacco API"""
