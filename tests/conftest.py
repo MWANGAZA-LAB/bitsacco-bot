@@ -10,7 +10,7 @@ from sqlalchemy.pool import StaticPool
 from httpx import AsyncClient
 from fastapi.testclient import TestClient
 
-from app.main import app
+from app.test_app import create_test_app
 from app.database.models import Base
 from app.database import db_manager
 
@@ -64,12 +64,14 @@ async def test_db(test_session_maker) -> AsyncGenerator[AsyncSession, None]:
 @pytest.fixture
 def test_client():
     """Create test client"""
+    app = create_test_app()
     return TestClient(app)
 
 
 @pytest.fixture
 async def async_client():
     """Create async test client"""
+    app = create_test_app()
     async with AsyncClient(app=app, base_url="http://test") as client:
         yield client
 

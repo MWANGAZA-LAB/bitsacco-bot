@@ -9,7 +9,7 @@ from typing import Dict, Any
 import psutil
 import asyncio
 
-from ...config import settings
+from app.config import settings
 
 health_router = APIRouter(tags=["Health"])
 

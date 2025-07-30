@@ -23,7 +23,7 @@ from ..models.user import UserSession, MessageContext
 from .bitsacco_api import BitsaccoAPIClient
 from .ai_service import AIConversationService
 from .user_service import UserService
-from .bitcoin_service import BitcoinPriceService
+from .simple_bitcoin_service import SimpleBitcoinPriceService
 
 logger = structlog.get_logger(__name__)
 
@@ -49,7 +49,7 @@ class WhatsAppService:
         bitsacco_api: BitsaccoAPIClient,
         ai_service: AIConversationService,
         user_service: UserService,
-        bitcoin_service: BitcoinPriceService,
+        bitcoin_service: SimpleBitcoinPriceService,
     ):
         self.bitsacco_api = bitsacco_api
         self.ai_service = ai_service
@@ -526,7 +526,11 @@ What would you like to do?
                 kes_balance = balance_data.get("kes_balance", 0)
 
                 # Get current Bitcoin price
-                btc_price_kes = await self.bitcoin_service.get_price("KES")
+                btc_price_usd = await self.bitcoin_service.get_current_price("usd")
+                # Convert to KES (simplified - use fixed rate or implement conversion)
+                btc_price_kes = (
+                    btc_price_usd * 130 if btc_price_usd else 0
+                )  # Approx USD to KES
                 btc_value_kes = btc_balance * btc_price_kes if btc_price_kes else 0
 
                 balance_msg = f"""
@@ -638,8 +642,9 @@ Please complete the M-Pesa payment to confirm your Bitcoin savings.
     async def _handle_price_command(self, user_id: str) -> None:
         """Handle Bitcoin price request"""
         try:
-            price_summary = await self.bitcoin_service.get_price_summary()
-            await self._send_message(user_id, price_summary)
+            price = await self.bitcoin_service.get_current_price("usd")
+            price_message = self.bitcoin_service.format_price(price)
+            await self._send_message(user_id, price_message)
         except Exception as e:
             logger.error("Error fetching price", error=str(e))
             await self._send_message(user_id, "❌ Error fetching Bitcoin price.")

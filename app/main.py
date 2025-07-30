@@ -21,7 +21,7 @@ from .config import settings
 from .database.session import DatabaseManager
 from .services.whatsapp_service import WhatsAppService
 from .services.bitsacco_api import BitsaccoAPIClient
-from .services.bitcoin_service import BitcoinPriceService
+from .services.simple_bitcoin_service import SimpleBitcoinPriceService
 from .services.ai_service import AIConversationService
 from .services.user_service import UserService
 from .api.routes.health import health_router
@@ -48,7 +48,7 @@ async def lifespan(app: FastAPI):
     services["database"] = db_manager
 
     # Initialize services
-    services["bitcoin_price"] = BitcoinPriceService()
+    services["bitcoin_price"] = SimpleBitcoinPriceService()
     services["bitsacco_api"] = BitsaccoAPIClient()
     services["ai_conversation"] = AIConversationService()
     services["user_service"] = UserService(db_manager.get_session)
@@ -58,12 +58,12 @@ async def lifespan(app: FastAPI):
         bitsacco_api=services["bitsacco_api"],
         ai_service=services["ai_conversation"],
         user_service=services["user_service"],
-        bitcoin_service=services["bitcoin_price"]
+        bitcoin_service=services["bitcoin_price"],
     )
     services["whatsapp"] = whatsapp_service
 
     # Start background services
-    await services["bitcoin_price"].start()
+    # Note: SimpleBitcoinPriceService doesn't need start/stop lifecycle
     await services["bitsacco_api"].initialize()
     await services["ai_conversation"].initialize()
 
@@ -80,8 +80,7 @@ async def lifespan(app: FastAPI):
     # Stop services gracefully
     if "whatsapp" in services:
         await services["whatsapp"].stop()
-    if "bitcoin_price" in services:
-        await services["bitcoin_price"].stop()
+    # Note: SimpleBitcoinPriceService doesn't need cleanup
     if "bitsacco_api" in services:
         await services["bitsacco_api"].close()
     if "database" in services:
@@ -99,14 +98,11 @@ def create_app() -> FastAPI:
         version="3.0.0",
         docs_url="/docs" if settings.DEBUG else None,
         redoc_url="/redoc" if settings.DEBUG else None,
-        lifespan=lifespan
+        lifespan=lifespan,
     )
 
     # Security middleware
-    app.add_middleware(
-        TrustedHostMiddleware,
-        allowed_hosts=settings.ALLOWED_HOSTS
-    )
+    app.add_middleware(TrustedHostMiddleware, allowed_hosts=settings.ALLOWED_HOSTS)
 
     # CORS middleware
     app.add_middleware(
@@ -118,7 +114,7 @@ def create_app() -> FastAPI:
     )
 
     # Include routers
-    app.include_router(health_router, prefix="/health", tags=["Health"])
+    app.include_router(health_router, tags=["Health"])
     app.include_router(webhook_router, prefix="/webhooks", tags=["Webhooks"])
     app.include_router(users_router, prefix="/api/users", tags=["Users"])
 
@@ -130,7 +126,7 @@ def create_app() -> FastAPI:
             "version": "3.0.0",
             "description": "Bitcoin SACCO WhatsApp integration",
             "status": "operational",
-            "architecture": "Python-only production implementation"
+            "architecture": "Python-only production implementation",
         }
 
     @app.get("/status")
@@ -138,12 +134,12 @@ def create_app() -> FastAPI:
         """Detailed service status"""
         status_info = {
             "services": {},
-            "timestamp": structlog.stdlib.datetime.datetime.utcnow().isoformat()
+            "timestamp": structlog.stdlib.datetime.datetime.utcnow().isoformat(),
         }
 
         for service_name, service in services.items():
             try:
-                if hasattr(service, 'health_check'):
+                if hasattr(service, "health_check"):
                     status_info["services"][service_name] = await service.health_check()
                 else:
                     status_info["services"][service_name] = "running"
@@ -161,13 +157,14 @@ app = create_app()
 
 def get_service(service_name: str):
     """Dependency to get service instances"""
+
     def _get_service():
         if service_name not in services:
             raise HTTPException(
-                status_code=503,
-                detail=f"Service {service_name} not available"
+                status_code=503, detail=f"Service {service_name} not available"
             )
         return services[service_name]
+
     return _get_service
 
 
@@ -191,5 +188,5 @@ if __name__ == "__main__":
         reload=settings.DEBUG,
         workers=1,  # WhatsApp session requires single worker
         log_config=None,  # Use our custom logging
-        access_log=settings.DEBUG
+        access_log=settings.DEBUG,
     )

@@ -11,7 +11,7 @@ from ..database import get_db
 from ..services.whatsapp_service import WhatsAppService
 from ..services.user_service import UserService
 from ..services.ai_service import AIConversationService
-from ..services.bitcoin_service import BitcoinPriceService
+from ..services.simple_bitcoin_service import SimpleBitcoinPriceService
 from ..services.bitsacco_api import BitsaccoAPIService
 
 logger = structlog.get_logger(__name__)
