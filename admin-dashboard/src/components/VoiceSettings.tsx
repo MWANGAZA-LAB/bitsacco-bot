@@ -39,7 +39,7 @@ import {
   Settings,
   Save,
   Refresh,
-  TestTube,
+  Science,
   Language,
   RecordVoiceOver,
 } from '@mui/icons-material';
@@ -79,7 +79,7 @@ const VoiceSettings: React.FC = () => {
     responseFormat: 'mp3_44100_128',
   });
 
-  const [voices, setVoices] = useState<VoiceOption[]>([
+  const [voices] = useState<VoiceOption[]>([
     { id: 'rachel', name: 'Rachel', description: 'Young American Female', category: 'Premade', language: 'en' },
     { id: 'daniel', name: 'Daniel', description: 'Middle Aged British Male', category: 'Premade', language: 'en' },
     { id: 'lily', name: 'Lily', description: 'Middle Aged American Female', category: 'Premade', language: 'en' },
@@ -411,7 +411,7 @@ const VoiceSettings: React.FC = () => {
 
                 <Button
                   variant="outlined"
-                  startIcon={<TestTube />}
+                  startIcon={<Science />}
                   onClick={() => setTestDialogOpen(true)}
                   disabled={!config.enabled}
                 >

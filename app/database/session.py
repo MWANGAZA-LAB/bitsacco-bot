@@ -3,7 +3,6 @@ Database session management for Bitsacco WhatsApp Bot
 Async database connectivity with SQLAlchemy
 """
 
-import asyncio
 from typing import AsyncGenerator, Optional
 from sqlalchemy.ext.asyncio import (
     AsyncSession,

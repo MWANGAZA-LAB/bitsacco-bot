@@ -4,17 +4,16 @@ Handles message processing, user sessions, and bot interactions
 """
 
 import asyncio
-import json
 import time
 from datetime import datetime, timedelta
 from typing import Dict, Any, Optional, List
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
-from selenium.common.exceptions import TimeoutException, WebDriverException
+from selenium.common.exceptions import TimeoutException
 from webdriver_manager.chrome import ChromeDriverManager
 import structlog
 
@@ -168,7 +167,7 @@ class WhatsAppService:
         """Background task to process incoming messages"""
         logger.info("🔄 Starting message processor")
 
-        last_message_check = time.time()
+        time.time()
         processed_messages = set()
 
         while self.is_running:
@@ -313,7 +312,7 @@ class WhatsAppService:
                 By.CSS_SELECTOR, "[data-testid='msg-meta'] [data-icon='msg-check']"
             )
             return len(outgoing_indicators) > 0
-        except:
+        except Exception:
             return False
 
     async def _handle_message(self, message: WhatsAppMessage) -> None:

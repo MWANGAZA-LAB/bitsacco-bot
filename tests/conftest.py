@@ -12,7 +12,6 @@ from fastapi.testclient import TestClient
 
 from app.test_app import create_test_app
 from app.database.models import Base
-from app.database import db_manager
 
 
 # Test database URL (SQLite in memory)

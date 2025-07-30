@@ -3,7 +3,7 @@ User Service - User management and authentication
 Handles user sessions, authentication, and state management
 """
 
-from typing import Dict, Any, Optional
+from typing import Dict, Any
 from datetime import datetime, timedelta
 import structlog
 

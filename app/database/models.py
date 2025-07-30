@@ -3,7 +3,6 @@ Database Models - SQLAlchemy models for persistent storage
 """
 
 from datetime import datetime
-from typing import Optional
 from sqlalchemy import (
     Column,
     String,
@@ -17,7 +16,6 @@ from sqlalchemy import (
 )
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
-import enum
 
 from ..models.user import UserState
 

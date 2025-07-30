@@ -3,7 +3,6 @@
 Simple test script to debug API issues
 """
 
-import asyncio
 import sys
 from fastapi.testclient import TestClient
 
@@ -11,7 +10,6 @@ from fastapi.testclient import TestClient
 def test_basic_import():
     """Test if we can import the main app"""
     try:
-        from app.main import create_app
 
         print("✅ Successfully imported create_app")
         return True

@@ -3,11 +3,10 @@ Health check API routes for Bitsacco WhatsApp Bot
 Provides system health and status endpoints
 """
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter
 from datetime import datetime
 from typing import Dict, Any
 import psutil
-import asyncio
 
 from app.config import settings
 

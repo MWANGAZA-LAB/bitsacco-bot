@@ -4,10 +4,8 @@ Handles incoming webhook events and notifications
 """
 
 from fastapi import APIRouter, Request, HTTPException
-from typing import Dict, Any
+from typing import Dict
 import structlog
-
-from ...config import settings
 
 logger = structlog.get_logger(__name__)
 

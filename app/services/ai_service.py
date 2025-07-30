@@ -3,7 +3,6 @@ AI Conversation Service - OpenAI integration for WhatsApp bot
 Handles intelligent conversation management and responses
 """
 
-import asyncio
 from typing import Dict, Any, Optional, List
 from openai import AsyncOpenAI
 import structlog
@@ -109,7 +108,10 @@ class AIConversationService:
                 user=user_session.phone_number,
                 error=str(e),
             )
-            return "🤖 I'm having trouble processing your message right now. Please try again in a moment."
+            return (
+                "🤖 I'm having trouble processing your message right now. "
+                "Please try again in a moment."
+            )
 
     async def generate_welcome_message(self, user_session: UserSession) -> str:
         """Generate personalized welcome message"""
@@ -237,7 +239,8 @@ _Type 'start' to begin!_
     ) -> str:
         """Generate system prompt based on context"""
         base_prompt = """
-You are a helpful Bitcoin savings assistant for Bitsacco, a Bitcoin savings platform in Kenya.
+You are a helpful Bitcoin savings assistant for Bitsacco,
+a Bitcoin savings platform in Kenya.
 
 PERSONALITY:
 - Friendly, professional, and knowledgeable about Bitcoin

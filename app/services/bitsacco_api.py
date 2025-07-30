@@ -4,9 +4,8 @@ Handles all API communication with Bitsacco.com backend
 """
 
 import asyncio
-import json
 from datetime import datetime
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, Optional
 import httpx
 from httpx import Timeout, Limits
 import structlog

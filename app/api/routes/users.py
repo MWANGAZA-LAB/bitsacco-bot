@@ -5,11 +5,10 @@ Handles user management and session operations
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
-from typing import Dict, Any, List
+from typing import Dict, Any
 import structlog
 
 from ...database.session import get_database_session
-from ...config import settings
 
 logger = structlog.get_logger(__name__)
 

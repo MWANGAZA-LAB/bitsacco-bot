@@ -2,7 +2,6 @@
 Database Configuration and Session Management
 """
 
-import asyncio
 from typing import AsyncGenerator
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.pool import StaticPool
@@ -30,9 +29,11 @@ class DatabaseManager:
                 settings.DATABASE_URL,
                 echo=settings.DEBUG,
                 poolclass=StaticPool if "sqlite" in settings.DATABASE_URL else None,
-                connect_args={"check_same_thread": False}
-                if "sqlite" in settings.DATABASE_URL
-                else {},
+                connect_args=(
+                    {"check_same_thread": False}
+                    if "sqlite" in settings.DATABASE_URL
+                    else {}
+                ),
             )
 
             # Create session maker

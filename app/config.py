@@ -5,8 +5,6 @@ Compatible with pydantic v2 and testing environment
 
 from pydantic_settings import BaseSettings
 from typing import List, Optional
-import os
-from pathlib import Path
 
 
 class Settings(BaseSettings):

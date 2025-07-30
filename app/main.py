@@ -7,14 +7,12 @@ Version: 3.0.0 - Python Only Rewrite
 Date: July 2025
 """
 
-from fastapi import FastAPI, HTTPException, Depends
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
-from fastapi.responses import JSONResponse
 from contextlib import asynccontextmanager
 import uvicorn
 import structlog
-import asyncio
 from typing import Dict, Any
 
 from .config import settings
