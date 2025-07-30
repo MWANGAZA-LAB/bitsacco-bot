@@ -421,3 +421,7 @@ class BitsaccoAPIClient:
             # Note: This won't work properly in async context
             # Proper cleanup should be done via close() method
             pass
+
+
+# Alias for backward compatibility
+BitsaccoAPIService = BitsaccoAPIClient

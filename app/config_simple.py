@@ -43,12 +43,6 @@ class Settings(BaseSettings):
     OPENAI_API_KEY: Optional[str] = None
     OPENAI_MODEL: str = "gpt-4"
     OPENAI_MAX_TOKENS: int = 1000
-    OPENAI_TEMPERATURE: float = 0.7
-
-    # Bitcoin Price API
-    COINGECKO_API_KEY: Optional[str] = None
-    BITCOIN_PRICE_UPDATE_INTERVAL: int = 60
-    BITCOIN_PRICE_CACHE_TTL: int = 300
 
     # Logging
     LOG_LEVEL: str = "INFO"
@@ -71,7 +65,6 @@ class Settings(BaseSettings):
         env_file = ".env"
         env_file_encoding = "utf-8"
         case_sensitive = True
-        extra = "ignore"  # Ignore extra fields from .env
 
 
 # Global settings instance

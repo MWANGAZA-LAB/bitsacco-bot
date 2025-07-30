@@ -31,6 +31,7 @@ logger = structlog.get_logger(__name__)
 @dataclass
 class WhatsAppMessage:
     """WhatsApp message structure"""
+
     id: str
     sender: str
     content: str
@@ -48,7 +49,7 @@ class WhatsAppService:
         bitsacco_api: BitsaccoAPIClient,
         ai_service: AIConversationService,
         user_service: UserService,
-        bitcoin_service: BitcoinPriceService
+        bitcoin_service: BitcoinPriceService,
     ):
         self.bitsacco_api = bitsacco_api
         self.ai_service = ai_service
@@ -67,7 +68,7 @@ class WhatsAppService:
             "messages_sent": 0,
             "active_sessions": 0,
             "errors": 0,
-            "start_time": None
+            "start_time": None,
         }
 
     async def initialize(self) -> None:
@@ -83,7 +84,9 @@ class WhatsAppService:
             chrome_options.add_argument("--disable-dev-shm-usage")
             chrome_options.add_argument("--disable-gpu")
             chrome_options.add_argument("--window-size=1920,1080")
-            chrome_options.add_argument("--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
+            chrome_options.add_argument(
+                "--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+            )
 
             # User data directory for session persistence
             user_data_dir = settings.DATA_DIR / "whatsapp-session"
@@ -92,8 +95,10 @@ class WhatsAppService:
 
             # Initialize driver
             self.driver = webdriver.Chrome(
-                service=webdriver.chrome.service.Service(ChromeDriverManager().install()),
-                options=chrome_options
+                service=webdriver.chrome.service.Service(
+                    ChromeDriverManager().install()
+                ),
+                options=chrome_options,
             )
 
             # Navigate to WhatsApp Web
@@ -130,19 +135,27 @@ class WhatsAppService:
             # Check if already logged in
             wait.until(
                 EC.any_of(
-                    EC.presence_of_element_located((By.CSS_SELECTOR, "[data-testid='chat-list']")),
-                    EC.presence_of_element_located((By.CSS_SELECTOR, "canvas[aria-label='Scan me!']"))
+                    EC.presence_of_element_located(
+                        (By.CSS_SELECTOR, "[data-testid='chat-list']")
+                    ),
+                    EC.presence_of_element_located(
+                        (By.CSS_SELECTOR, "canvas[aria-label='Scan me!']")
+                    ),
                 )
             )
 
             # If QR code is present, inform user
-            qr_elements = self.driver.find_elements(By.CSS_SELECTOR, "canvas[aria-label='Scan me!']")
+            qr_elements = self.driver.find_elements(
+                By.CSS_SELECTOR, "canvas[aria-label='Scan me!']"
+            )
             if qr_elements:
                 logger.info("📱 Please scan the QR code in WhatsApp Web to continue")
 
                 # Wait for login completion
                 wait.until(
-                    EC.presence_of_element_located((By.CSS_SELECTOR, "[data-testid='chat-list']"))
+                    EC.presence_of_element_located(
+                        (By.CSS_SELECTOR, "[data-testid='chat-list']")
+                    )
                 )
 
             logger.info("✅ WhatsApp login successful")
@@ -191,7 +204,7 @@ class WhatsAppService:
             # Find unread chat elements
             unread_chats = self.driver.find_elements(
                 By.CSS_SELECTOR,
-                "[data-testid='cell-frame-container'] [data-testid='unread-count']"
+                "[data-testid='cell-frame-container'] [data-testid='unread-count']",
             )
 
             for chat_element in unread_chats[:5]:  # Limit to 5 chats at a time
@@ -199,7 +212,7 @@ class WhatsAppService:
                     # Click on chat to open
                     chat_container = chat_element.find_element(By.XPATH, "../../..")
                     chat_container.click()
-                    await asyncio.sleep(0.5)
+                    time.sleep(0.5)  # Use time.sleep for sync function
 
                     # Get messages from this chat
                     chat_messages = self._extract_chat_messages()
@@ -220,8 +233,12 @@ class WhatsAppService:
 
         try:
             # Get chat info
-            chat_header = self.driver.find_element(By.CSS_SELECTOR, "[data-testid='conversation-header']")
-            chat_name = chat_header.find_element(By.CSS_SELECTOR, "[data-testid='conversation-info-header-chat-title']").text
+            chat_header = self.driver.find_element(
+                By.CSS_SELECTOR, "[data-testid='conversation-header']"
+            )
+            chat_name = chat_header.find_element(
+                By.CSS_SELECTOR, "[data-testid='conversation-info-header-chat-title']"
+            ).text
 
             # Skip group chats for now
             if "participants" in chat_name.lower() or len(chat_name.split()) > 2:
@@ -229,8 +246,7 @@ class WhatsAppService:
 
             # Get recent messages
             message_elements = self.driver.find_elements(
-                By.CSS_SELECTOR,
-                "[data-testid='msg-container']"
+                By.CSS_SELECTOR, "[data-testid='msg-container']"
             )
 
             # Process last 5 messages
@@ -248,11 +264,15 @@ class WhatsAppService:
 
         return messages
 
-    def _parse_message_element(self, element, chat_name: str) -> Optional[WhatsAppMessage]:
+    def _parse_message_element(
+        self, element, chat_name: str
+    ) -> Optional[WhatsAppMessage]:
         """Parse individual message element"""
         try:
             # Get message text
-            text_elements = element.find_elements(By.CSS_SELECTOR, "[data-testid='conversation-text']")
+            text_elements = element.find_elements(
+                By.CSS_SELECTOR, "[data-testid='conversation-text']"
+            )
             if not text_elements:
                 return None
 
@@ -261,8 +281,14 @@ class WhatsAppService:
                 return None
 
             # Get timestamp
-            time_elements = element.find_elements(By.CSS_SELECTOR, "[data-testid='msg-meta'] span")
-            timestamp_str = time_elements[0].text if time_elements else datetime.utcnow().strftime("%H:%M")
+            time_elements = element.find_elements(
+                By.CSS_SELECTOR, "[data-testid='msg-meta'] span"
+            )
+            timestamp_str = (
+                time_elements[0].text
+                if time_elements
+                else datetime.utcnow().strftime("%H:%M")
+            )
 
             # Generate message ID
             message_id = f"{chat_name}_{hash(content)}_{timestamp_str}"
@@ -272,7 +298,7 @@ class WhatsAppService:
                 sender=chat_name,
                 content=content,
                 timestamp=datetime.utcnow(),
-                message_type="text"
+                message_type="text",
             )
 
         except Exception as e:
@@ -283,7 +309,9 @@ class WhatsAppService:
         """Check if message is sent by us"""
         try:
             # Messages we sent have different styling
-            outgoing_indicators = element.find_elements(By.CSS_SELECTOR, "[data-testid='msg-meta'] [data-icon='msg-check']")
+            outgoing_indicators = element.find_elements(
+                By.CSS_SELECTOR, "[data-testid='msg-meta'] [data-icon='msg-check']"
+            )
             return len(outgoing_indicators) > 0
         except:
             return False
@@ -294,7 +322,7 @@ class WhatsAppService:
             logger.info(
                 "📨 Processing message",
                 sender=self._mask_phone(message.sender),
-                content_length=len(message.content)
+                content_length=len(message.content),
             )
 
             # Get or create user session
@@ -306,18 +334,25 @@ class WhatsAppService:
                 phone_number=self._extract_phone_number(message.sender),
                 message_type=message.message_type,
                 timestamp=message.timestamp,
-                is_group=False
+                is_group=False,
             )
 
             # Process message based on session state
-            if session.state == "init" or message.content.lower() in ["/start", "hi", "hello", "mambo"]:
+            if session.state == "init" or message.content.lower() in [
+                "/start",
+                "hi",
+                "hello",
+                "mambo",
+            ]:
                 await self._handle_welcome(message.sender, session)
             elif session.state == "awaiting_phone":
                 await self._handle_phone_input(message.sender, message.content, session)
             elif session.state == "awaiting_otp":
                 await self._handle_otp_input(message.sender, message.content, session)
             elif session.state == "authenticated":
-                await self._handle_authenticated_message(message.sender, message.content, session, context)
+                await self._handle_authenticated_message(
+                    message.sender, message.content, session, context
+                )
             else:
                 await self._send_help_message(message.sender)
 
@@ -341,7 +376,7 @@ class WhatsAppService:
                     user_id=user_id,
                     state="init",
                     created_at=datetime.utcnow(),
-                    last_activity=datetime.utcnow()
+                    last_activity=datetime.utcnow(),
                 )
 
         return self.user_sessions[user_id]
@@ -361,7 +396,9 @@ _Your phone number must be registered with Bitsacco.com_
         await self._send_message(user_id, welcome_msg)
         session.state = "awaiting_phone"
 
-    async def _handle_phone_input(self, user_id: str, phone: str, session: UserSession) -> None:
+    async def _handle_phone_input(
+        self, user_id: str, phone: str, session: UserSession
+    ) -> None:
         """Handle phone number input and OTP request"""
         # Normalize phone number
         normalized_phone = self._normalize_phone_number(phone)
@@ -369,7 +406,7 @@ _Your phone number must be registered with Bitsacco.com_
         if not self._is_valid_phone_number(normalized_phone):
             await self._send_message(
                 user_id,
-                "❌ Please enter a valid phone number with country code (e.g., +254700123456)"
+                "❌ Please enter a valid phone number with country code (e.g., +254700123456)",
             )
             return
 
@@ -380,7 +417,7 @@ _Your phone number must be registered with Bitsacco.com_
             if not user_data.get("exists", True):
                 await self._send_message(
                     user_id,
-                    f"❌ No Bitsacco account found for {normalized_phone}.\n\nPlease register at https://bitsacco.com first."
+                    f"❌ No Bitsacco account found for {normalized_phone}.\n\nPlease register at https://bitsacco.com first.",
                 )
                 return
 
@@ -390,21 +427,27 @@ _Your phone number must be registered with Bitsacco.com_
             if otp_result.get("success"):
                 await self._send_message(
                     user_id,
-                    f"📱 OTP sent to {normalized_phone}\n\nPlease enter the 6-digit code:"
+                    f"📱 OTP sent to {normalized_phone}\n\nPlease enter the 6-digit code:",
                 )
                 session.state = "awaiting_otp"
                 session.phone_number = normalized_phone
             else:
-                await self._send_message(user_id, "❌ Failed to send OTP. Please try again.")
+                await self._send_message(
+                    user_id, "❌ Failed to send OTP. Please try again."
+                )
 
         except Exception as e:
             logger.error("Error in phone input handling", error=str(e))
-            await self._send_message(user_id, "❌ Error verifying phone number. Please try again.")
+            await self._send_message(
+                user_id, "❌ Error verifying phone number. Please try again."
+            )
 
-    async def _handle_otp_input(self, user_id: str, otp: str, session: UserSession) -> None:
+    async def _handle_otp_input(
+        self, user_id: str, otp: str, session: UserSession
+    ) -> None:
         """Handle OTP verification"""
         # Extract digits only
-        otp_digits = ''.join(filter(str.isdigit, otp))
+        otp_digits = "".join(filter(str.isdigit, otp))
 
         if len(otp_digits) != 6:
             await self._send_message(user_id, "❌ Please enter a valid 6-digit OTP")
@@ -412,7 +455,9 @@ _Your phone number must be registered with Bitsacco.com_
 
         try:
             # Verify OTP with Bitsacco
-            verify_result = await self.bitsacco_api.verify_otp(session.phone_number, otp_digits)
+            verify_result = await self.bitsacco_api.verify_otp(
+                session.phone_number, otp_digits
+            )
 
             if verify_result.get("success"):
                 session.state = "authenticated"
@@ -441,14 +486,12 @@ What would you like to do?
 
         except Exception as e:
             logger.error("Error in OTP verification", error=str(e))
-            await self._send_message(user_id, "❌ Error verifying OTP. Please try again.")
+            await self._send_message(
+                user_id, "❌ Error verifying OTP. Please try again."
+            )
 
     async def _handle_authenticated_message(
-        self,
-        user_id: str,
-        content: str,
-        session: UserSession,
-        context: MessageContext
+        self, user_id: str, content: str, session: UserSession, context: MessageContext
     ) -> None:
         """Handle messages from authenticated users"""
         content_lower = content.lower().strip()
@@ -498,25 +541,37 @@ What would you like to do?
 
                 await self._send_message(user_id, balance_msg)
             else:
-                await self._send_message(user_id, "❌ Unable to fetch balance. Please try again.")
+                await self._send_message(
+                    user_id, "❌ Unable to fetch balance. Please try again."
+                )
 
         except Exception as e:
             logger.error("Error fetching balance", error=str(e))
-            await self._send_message(user_id, "❌ Error fetching balance. Please try again.")
+            await self._send_message(
+                user_id, "❌ Error fetching balance. Please try again."
+            )
 
-    async def _handle_save_command(self, user_id: str, content: str, session: UserSession) -> None:
+    async def _handle_save_command(
+        self, user_id: str, content: str, session: UserSession
+    ) -> None:
         """Handle Bitcoin savings command"""
         try:
             # Extract amount
             amount_str = content.lower().replace("save", "").strip()
-            amount = float(''.join(filter(lambda x: x.isdigit() or x == '.', amount_str)))
+            amount = float(
+                "".join(filter(lambda x: x.isdigit() or x == ".", amount_str))
+            )
 
             if amount < 100:
-                await self._send_message(user_id, "❌ Minimum savings amount is KES 100")
+                await self._send_message(
+                    user_id, "❌ Minimum savings amount is KES 100"
+                )
                 return
 
             if amount > 50000:
-                await self._send_message(user_id, "❌ Maximum single savings amount is KES 50,000")
+                await self._send_message(
+                    user_id, "❌ Maximum single savings amount is KES 50,000"
+                )
                 return
 
             # Initiate Bitcoin savings
@@ -539,10 +594,15 @@ Please complete the M-Pesa payment to confirm your Bitcoin savings.
 
                 await self._send_message(user_id, save_msg)
             else:
-                await self._send_message(user_id, f"❌ {save_result.get('message', 'Failed to initiate savings')}")
+                await self._send_message(
+                    user_id,
+                    f"❌ {save_result.get('message', 'Failed to initiate savings')}",
+                )
 
         except ValueError:
-            await self._send_message(user_id, "❌ Please enter a valid amount (e.g., 'save 1000')")
+            await self._send_message(
+                user_id, "❌ Please enter a valid amount (e.g., 'save 1000')"
+            )
         except Exception as e:
             logger.error("Error in save command", error=str(e))
             await self._send_message(user_id, "❌ Error processing savings request.")
@@ -550,7 +610,9 @@ Please complete the M-Pesa payment to confirm your Bitcoin savings.
     async def _handle_history_command(self, user_id: str, session: UserSession) -> None:
         """Handle transaction history request"""
         try:
-            history_data = await self.bitsacco_api.get_transaction_history(session.bitsacco_user_id)
+            history_data = await self.bitsacco_api.get_transaction_history(
+                session.bitsacco_user_id
+            )
 
             if history_data.get("success") and history_data.get("transactions"):
                 transactions = history_data["transactions"][:5]  # Last 5 transactions
@@ -583,11 +645,7 @@ Please complete the M-Pesa payment to confirm your Bitcoin savings.
             await self._send_message(user_id, "❌ Error fetching Bitcoin price.")
 
     async def _handle_ai_conversation(
-        self,
-        user_id: str,
-        content: str,
-        session: UserSession,
-        context: MessageContext
+        self, user_id: str, content: str, session: UserSession, context: MessageContext
     ) -> None:
         """Handle AI-powered conversation"""
         try:
@@ -611,29 +669,40 @@ Please complete the M-Pesa payment to confirm your Bitcoin savings.
         """Send message to WhatsApp user"""
         try:
             # Find and open chat
-            search_box = self.driver.find_element(By.CSS_SELECTOR, "[data-testid='chat-list-search']")
+            search_box = self.driver.find_element(
+                By.CSS_SELECTOR, "[data-testid='chat-list-search']"
+            )
             search_box.clear()
             search_box.send_keys(user_id)
             await asyncio.sleep(1)
 
             # Click on first chat result
-            chat_result = self.driver.find_element(By.CSS_SELECTOR, "[data-testid='cell-frame-container']")
+            chat_result = self.driver.find_element(
+                By.CSS_SELECTOR, "[data-testid='cell-frame-container']"
+            )
             chat_result.click()
             await asyncio.sleep(0.5)
 
             # Type message
-            message_box = self.driver.find_element(By.CSS_SELECTOR, "[data-testid='conversation-compose-box-input']")
+            message_box = self.driver.find_element(
+                By.CSS_SELECTOR, "[data-testid='conversation-compose-box-input']"
+            )
             message_box.clear()
 
             # Handle multi-line messages
-            lines = message.split('\n')
+            lines = message.split("\n")
             for i, line in enumerate(lines):
                 message_box.send_keys(line)
                 if i < len(lines) - 1:
-                    message_box.send_keys(webdriver.common.keys.Keys.SHIFT + webdriver.common.keys.Keys.ENTER)
+                    message_box.send_keys(
+                        webdriver.common.keys.Keys.SHIFT
+                        + webdriver.common.keys.Keys.ENTER
+                    )
 
             # Send message
-            send_button = self.driver.find_element(By.CSS_SELECTOR, "[data-testid='send']")
+            send_button = self.driver.find_element(
+                By.CSS_SELECTOR, "[data-testid='send']"
+            )
             send_button.click()
 
             self.stats["messages_sent"] += 1
@@ -669,12 +738,12 @@ Example: "How much Bitcoin do I have?" or "I want to save 500 shillings"
     def _normalize_phone_number(self, phone: str) -> str:
         """Normalize phone number to international format"""
         # Remove all non-digits
-        digits = ''.join(filter(str.isdigit, phone))
+        digits = "".join(filter(str.isdigit, phone))
 
         # Handle Kenyan numbers
-        if digits.startswith('254'):
+        if digits.startswith("254"):
             return f"+{digits}"
-        elif digits.startswith('0') and len(digits) == 10:
+        elif digits.startswith("0") and len(digits) == 10:
             return f"+254{digits[1:]}"
         elif len(digits) == 9:
             return f"+254{digits}"
@@ -683,7 +752,7 @@ Example: "How much Bitcoin do I have?" or "I want to save 500 shillings"
 
     def _is_valid_phone_number(self, phone: str) -> bool:
         """Validate phone number format"""
-        if not phone.startswith('+'):
+        if not phone.startswith("+"):
             return False
 
         digits = phone[1:]
@@ -692,7 +761,7 @@ Example: "How much Bitcoin do I have?" or "I want to save 500 shillings"
     def _extract_phone_number(self, chat_name: str) -> Optional[str]:
         """Extract phone number from chat name if possible"""
         # WhatsApp shows phone numbers for unsaved contacts
-        if '+' in chat_name and any(c.isdigit() for c in chat_name):
+        if "+" in chat_name and any(c.isdigit() for c in chat_name):
             return self._normalize_phone_number(chat_name)
         return None
 
@@ -707,11 +776,14 @@ Example: "How much Bitcoin do I have?" or "I want to save 500 shillings"
         while self.is_running:
             try:
                 current_time = datetime.utcnow()
-                timeout_threshold = current_time - timedelta(seconds=settings.SESSION_TIMEOUT)
+                timeout_threshold = current_time - timedelta(
+                    seconds=settings.SESSION_TIMEOUT
+                )
 
                 # Remove expired sessions
                 expired_sessions = [
-                    user_id for user_id, session in self.user_sessions.items()
+                    user_id
+                    for user_id, session in self.user_sessions.items()
                     if session.last_activity < timeout_threshold
                 ]
 
@@ -719,7 +791,9 @@ Example: "How much Bitcoin do I have?" or "I want to save 500 shillings"
                     del self.user_sessions[user_id]
 
                 if expired_sessions:
-                    logger.info(f"🧹 Cleaned up {len(expired_sessions)} expired sessions")
+                    logger.info(
+                        f"🧹 Cleaned up {len(expired_sessions)} expired sessions"
+                    )
 
                 await asyncio.sleep(settings.SESSION_CLEANUP_INTERVAL)
 
@@ -734,7 +808,9 @@ Example: "How much Bitcoin do I have?" or "I want to save 500 shillings"
                 # Check if WhatsApp Web is still responsive
                 if self.driver:
                     # Try to find chat list to verify connection
-                    chat_list = self.driver.find_elements(By.CSS_SELECTOR, "[data-testid='chat-list']")
+                    chat_list = self.driver.find_elements(
+                        By.CSS_SELECTOR, "[data-testid='chat-list']"
+                    )
                     if not chat_list:
                         logger.warning("⚠️ WhatsApp Web connection may be lost")
 
@@ -754,8 +830,9 @@ Example: "How much Bitcoin do I have?" or "I want to save 500 shillings"
             "stats": self.stats.copy(),
             "uptime_seconds": (
                 (datetime.utcnow() - self.stats["start_time"]).total_seconds()
-                if self.stats["start_time"] else 0
-            )
+                if self.stats["start_time"]
+                else 0
+            ),
         }
 
     async def stop(self) -> None:

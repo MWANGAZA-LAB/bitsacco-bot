@@ -59,6 +59,7 @@ class UserService:
 
         # Create new session
         session = UserSession(
+            user_id=phone_number,  # Use phone number as user_id
             phone_number=phone_number,
             current_state=UserState.INITIAL,
             created_at=datetime.utcnow(),
@@ -174,11 +175,11 @@ _The code expires in 5 minutes_
                     f"""
 ✅ *Verification Successful!*
 
-Welcome to Bitsacco, {session.first_name or 'friend'}! 
+Welcome to Bitsacco, {session.first_name or 'friend'}!
 
 Your account is now connected. You can now:
 • Check Bitcoin prices
-• View your savings balance  
+• View your savings balance
 • Start new savings
 • Track your investments
 

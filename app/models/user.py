@@ -21,6 +21,18 @@ class SessionState(str, Enum):
     ERROR = "error"
 
 
+class UserState(str, Enum):
+    """User state enum for database"""
+
+    INITIAL = "initial"
+    WAITING_FOR_OTP = "waiting_for_otp"  # Added missing state
+    AWAITING_PHONE = "awaiting_phone"
+    AWAITING_OTP = "awaiting_otp"
+    AUTHENTICATED = "authenticated"
+    PROCESSING = "processing"
+    ERROR = "error"
+
+
 class MessageType(str, Enum):
     """WhatsApp message types"""
 
@@ -39,13 +51,19 @@ class UserSession:
     """User session data"""
 
     user_id: str
-    state: SessionState
+    current_state: UserState  # Changed to UserState to match service
     created_at: datetime
     last_activity: datetime
     phone_number: Optional[str] = None
     bitsacco_user_id: Optional[str] = None
-    context_data: Dict[str, Any] = None
-    conversation_history: List[str] = None
+    context_data: Optional[Dict[str, Any]] = None
+    conversation_history: Optional[List[str]] = None
+
+    # Additional fields needed by service
+    is_authenticated: bool = False
+    otp_sent_at: Optional[datetime] = None
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
 
     def __post_init__(self):
         if self.context_data is None:

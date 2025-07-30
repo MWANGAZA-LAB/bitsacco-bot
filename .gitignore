@@ -90,3 +90,15 @@ Thumbs.db
 # Backup files
 *.backup
 *.bak
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+
+# Admin dashboard build
+admin-dashboard/dist/
+admin-dashboard/.vite/
+admin-dashboard/node_modules/
