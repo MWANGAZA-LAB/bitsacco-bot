@@ -1,6 +1,8 @@
 # Bitsacco WhatsApp Bot
 
-A production-ready WhatsApp bot for Bitsacco Bitcoin savings platform. Built with Python, FastAPI, and Selenium WebDriver.
+**Transform your M-Pesa savings into Bitcoin through simple WhatsApp conversations**
+
+A production-ready, intelligent WhatsApp bot that revolutionizes Bitcoin savings in Kenya. Built with enterprise-grade Python architecture featuring FastAPI, AI-powered conversations, and seamless M-Pesa integration through the Bitsacco platform.
 
 ## 🌟 Features
 

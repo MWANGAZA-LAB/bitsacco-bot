@@ -84,7 +84,8 @@ class WhatsAppService:
             chrome_options.add_argument("--disable-gpu")
             chrome_options.add_argument("--window-size=1920,1080")
             chrome_options.add_argument(
-                "--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+                "--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                "AppleWebKit/537.36"
             )
 
             # User data directory for session persistence
@@ -405,7 +406,8 @@ _Your phone number must be registered with Bitsacco.com_
         if not self._is_valid_phone_number(normalized_phone):
             await self._send_message(
                 user_id,
-                "❌ Please enter a valid phone number with country code (e.g., +254700123456)",
+                "❌ Please enter a valid phone number with country code "
+                "(e.g., +254700123456)",
             )
             return
 
@@ -416,7 +418,8 @@ _Your phone number must be registered with Bitsacco.com_
             if not user_data.get("exists", True):
                 await self._send_message(
                     user_id,
-                    f"❌ No Bitsacco account found for {normalized_phone}.\n\nPlease register at https://bitsacco.com first.",
+                    f"❌ No Bitsacco account found for {normalized_phone}.\n\n"
+                    f"Please register at https://bitsacco.com first.",
                 )
                 return
 
@@ -426,7 +429,8 @@ _Your phone number must be registered with Bitsacco.com_
             if otp_result.get("success"):
                 await self._send_message(
                     user_id,
-                    f"📱 OTP sent to {normalized_phone}\n\nPlease enter the 6-digit code:",
+                    f"📱 OTP sent to {normalized_phone}\n\n"
+                    f"Please enter the 6-digit code:",
                 )
                 session.state = "awaiting_otp"
                 session.phone_number = normalized_phone
@@ -736,7 +740,10 @@ Example: "How much Bitcoin do I have?" or "I want to save 500 shillings"
 
     async def _send_error_message(self, user_id: str) -> None:
         """Send generic error message"""
-        error_msg = "❌ Sorry, something went wrong. Please try again or type 'help' for assistance."
+        error_msg = (
+            "❌ Sorry, something went wrong. "
+            "Please try again or type 'help' for assistance."
+        )
         await self._send_message(user_id, error_msg)
 
     def _normalize_phone_number(self, phone: str) -> str:
