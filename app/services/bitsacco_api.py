@@ -157,7 +157,11 @@ class BitsaccoAPIClient:
             else:
                 return {
                     "success": False,
-                    "message": response.get("message", "Invalid OTP"),
+                    "message": (
+                        response.get("message", "Invalid OTP")
+                        if response
+                        else "Invalid OTP"
+                    ),
                 }
 
         except Exception as e:

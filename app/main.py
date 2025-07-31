@@ -49,7 +49,7 @@ async def lifespan(app: FastAPI):
     services["bitcoin_price"] = SimpleBitcoinPriceService()
     services["bitsacco_api"] = BitsaccoAPIClient()
     services["ai_conversation"] = AIConversationService()
-    services["user_service"] = UserService(db_manager.get_session)
+    services["user_service"] = UserService(services["bitsacco_api"])
 
     # Initialize WhatsApp service (this will handle QR code scanning)
     whatsapp_service = WhatsAppService(

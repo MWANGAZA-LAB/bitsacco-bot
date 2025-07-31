@@ -5,8 +5,6 @@
 
 import React, { useState } from 'react';
 import {
-  Card,
-  CardContent,
   Typography,
   Box,
   TextField,
@@ -17,18 +15,12 @@ import {
   MenuItem,
   Switch,
   FormControlLabel,
-  Divider,
   Grid,
   Alert,
   Accordion,
   AccordionSummary,
   AccordionDetails,
   Chip,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemSecondaryAction,
-  IconButton,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -38,17 +30,11 @@ import {
   Save,
   ExpandMore,
   Security,
-  Notifications,
-  Integration,
-  Storage,
-  Language,
-  Palette,
   Backup,
-  Restore,
   Download,
   Upload,
   Refresh,
-  Test,
+  PlayArrow,
   CheckCircle,
   Error,
 } from '@mui/icons-material';
@@ -201,7 +187,7 @@ const Settings: React.FC = () => {
       case 'error':
         return <Error color="error" />;
       default:
-        return <Test />;
+        return <PlayArrow />;
     }
   };
 

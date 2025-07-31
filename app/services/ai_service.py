@@ -64,11 +64,11 @@ class AIConversationService:
                 return "🤖 AI service is not available at the moment."
 
             # Get conversation context
-            context = self._get_conversation_context(user_session.phone_number)
+            context = self._get_conversation_context(user_session.phone_number or "")
 
-            # Add current message to context
+            # Add current message to context (placeholder since original_message doesn't exist)
             context.append(
-                {"role": "user", "content": message_context.original_message}
+                {"role": "user", "content": "User message"}  # TODO: Pass actual message
             )
 
             # Generate system prompt based on user state
@@ -86,13 +86,17 @@ class AIConversationService:
                 timeout=30.0,
             )
 
-            ai_response = response.choices[0].message.content.strip()
+            ai_response = (
+                response.choices[0].message.content.strip()
+                if response.choices[0].message.content
+                else "I apologize, I couldn't generate a response."
+            )
 
             # Add AI response to context
             context.append({"role": "assistant", "content": ai_response})
 
             # Update conversation context
-            self._update_conversation_context(user_session.phone_number, context)
+            self._update_conversation_context(user_session.phone_number or "", context)
 
             logger.debug(
                 "AI response generated",

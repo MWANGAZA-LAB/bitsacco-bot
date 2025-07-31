@@ -73,6 +73,8 @@ class UserSession:
 
     def add_to_history(self, message: str, max_length: int = 10):
         """Add message to conversation history"""
+        if self.conversation_history is None:
+            self.conversation_history = []
         self.conversation_history.append(message)
         if len(self.conversation_history) > max_length:
             self.conversation_history = self.conversation_history[-max_length:]

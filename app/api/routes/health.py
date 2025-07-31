@@ -8,7 +8,7 @@ from datetime import datetime
 from typing import Dict, Any
 import psutil
 
-from app.config import settings
+from ...config import settings
 
 health_router = APIRouter(tags=["Health"])
 

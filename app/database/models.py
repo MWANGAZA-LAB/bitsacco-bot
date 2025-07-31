@@ -3,6 +3,7 @@ Database Models - SQLAlchemy models for persistent storage
 """
 
 from datetime import datetime
+from typing import TYPE_CHECKING, Any
 from sqlalchemy import (
     Column,
     String,
@@ -19,7 +20,8 @@ from sqlalchemy.orm import relationship
 
 from ..models.user import UserState
 
-Base = declarative_base()
+# Proper type annotation for SQLAlchemy Base
+Base: Any = declarative_base()
 
 
 class UserSessionModel(Base):
@@ -34,7 +36,9 @@ class UserSessionModel(Base):
 
     # Authentication
     is_authenticated = Column(Boolean, default=False)
-    current_state = Column(SQLEnum(UserState), default=UserState.INITIAL)
+    current_state: Column[UserState] = Column(
+        SQLEnum(UserState), default=UserState.INITIAL
+    )
 
     # Timestamps
     created_at = Column(DateTime, default=datetime.utcnow)

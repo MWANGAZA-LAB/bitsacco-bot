@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from datetime import datetime
 from typing import Dict, Any
 
-from app.config import settings
+from .config import settings
 
 
 def create_test_app() -> FastAPI:

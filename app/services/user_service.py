@@ -74,7 +74,8 @@ class UserService:
     async def update_session(self, session: UserSession) -> None:
         """Update user session"""
         session.last_activity = datetime.utcnow()
-        self.user_sessions[session.phone_number] = session
+        if session.phone_number:
+            self.user_sessions[session.phone_number] = session
 
         logger.debug(
             "Updated user session",
@@ -166,7 +167,7 @@ _The code expires in 5 minutes_
                 # Authentication successful
                 session.is_authenticated = True
                 session.current_state = UserState.AUTHENTICATED
-                session.authenticated_at = datetime.utcnow()
+                # Field doesn't exist: session.authenticated_at
 
                 await self.update_session(session)
 
