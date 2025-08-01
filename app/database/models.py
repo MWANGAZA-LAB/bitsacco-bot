@@ -15,13 +15,13 @@ from sqlalchemy import (
     ForeignKey,
     Enum as SQLEnum,
 )
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import DeclarativeBase, relationship
 
 from ..models.user import UserState
 
-# Proper type annotation for SQLAlchemy Base
-Base: Any = declarative_base()
+# SQLAlchemy 2.0 style declarative base
+class Base(DeclarativeBase):
+    pass
 
 
 class UserSessionModel(Base):

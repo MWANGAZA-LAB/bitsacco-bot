@@ -9,7 +9,7 @@ from datetime import datetime
 from app.services.user_service import UserService
 from app.services.ai_service import AIConversationService
 from app.services.simple_bitcoin_service import SimpleBitcoinPriceService
-from app.models.user import UserSession, UserState, MessageContext
+from app.models.user import UserSession, UserState, MessageContext, MessageType
 
 
 class TestUserService:
@@ -108,7 +108,9 @@ class TestAIService:
         )
 
         message_context = MessageContext(
-            original_message="Hello", message_type="text", timestamp=datetime.utcnow()
+            original_message="Hello", 
+            message_type=MessageType.TEXT, 
+            timestamp=datetime.utcnow()
         )
 
         response = await ai_service.generate_response(user_session, message_context)

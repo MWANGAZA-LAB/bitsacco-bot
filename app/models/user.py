@@ -50,11 +50,11 @@ class MessageType(str, Enum):
 class UserSession:
     """User session data"""
 
-    user_id: str
-    current_state: UserState  # Changed to UserState to match service
-    created_at: datetime
-    last_activity: datetime
     phone_number: Optional[str] = None
+    user_id: str = ""
+    current_state: UserState = UserState.INITIAL
+    created_at: Optional[datetime] = None
+    last_activity: Optional[datetime] = None
     bitsacco_user_id: Optional[str] = None
     context_data: Optional[Dict[str, Any]] = None
     conversation_history: Optional[List[str]] = None
@@ -70,6 +70,12 @@ class UserSession:
             self.context_data = {}
         if self.conversation_history is None:
             self.conversation_history = []
+        if self.created_at is None:
+            self.created_at = datetime.utcnow()
+        if self.last_activity is None:
+            self.last_activity = datetime.utcnow()
+        if not self.user_id and self.phone_number:
+            self.user_id = self.phone_number
 
     def add_to_history(self, message: str, max_length: int = 10):
         """Add message to conversation history"""
@@ -93,9 +99,10 @@ class UserSession:
 class MessageContext:
     """Context information for WhatsApp messages"""
 
-    user_id: str
     message_type: MessageType
     timestamp: datetime
+    user_id: str = ""
+    original_message: Optional[str] = None
     phone_number: Optional[str] = None
     is_group: bool = False
     group_id: Optional[str] = None

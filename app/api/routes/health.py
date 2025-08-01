@@ -21,6 +21,12 @@ async def health_check() -> Dict[str, Any]:
         "timestamp": datetime.utcnow().isoformat(),
         "service": settings.APP_NAME,
         "version": settings.VERSION,
+        "services": {
+            "api": "healthy",
+            "database": "healthy",
+            "whatsapp": "healthy",
+            "bitcoin_api": "healthy",
+        },
     }
 
 

@@ -89,8 +89,9 @@ class WhatsAppService:
             )
 
             # User data directory for session persistence
-            user_data_dir = settings.DATA_DIR / "whatsapp-session"
-            user_data_dir.mkdir(exist_ok=True)
+            import os
+            user_data_dir = os.path.join(settings.DATA_DIR, "whatsapp-session")
+            os.makedirs(user_data_dir, exist_ok=True)
             chrome_options.add_argument(f"--user-data-dir={user_data_dir}")
 
             # Initialize driver

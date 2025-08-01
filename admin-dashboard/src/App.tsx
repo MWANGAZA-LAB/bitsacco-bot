@@ -21,7 +21,10 @@ import {
   People as PeopleIcon,
   RecordVoiceOver as VoiceIcon,
   Menu as MenuIcon,
+  Brightness4 as DarkModeIcon,
+  Brightness7 as LightModeIcon,
 } from '@mui/icons-material'
+import { useThemeMode } from './contexts/ThemeContext'
 
 // Import components
 import Dashboard from './components/Dashboard'
@@ -44,6 +47,7 @@ function App() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const theme = useTheme()
   const location = useLocation()
+  const { mode, toggleTheme } = useThemeMode()
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen)
@@ -92,9 +96,16 @@ function App() {
           >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" noWrap component="div">
+          <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
             Bitsacco WhatsApp Bot - Admin Dashboard
           </Typography>
+          <IconButton
+            color="inherit"
+            onClick={toggleTheme}
+            aria-label="toggle dark mode"
+          >
+            {mode === 'dark' ? <LightModeIcon /> : <DarkModeIcon />}
+          </IconButton>
         </Toolbar>
       </AppBar>
 

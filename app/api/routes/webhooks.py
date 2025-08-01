@@ -12,7 +12,7 @@ logger = structlog.get_logger(__name__)
 webhook_router = APIRouter(tags=["Webhooks"])
 
 
-@webhook_router.post("/webhooks/whatsapp")
+@webhook_router.post("/whatsapp")
 async def whatsapp_webhook(request: Request) -> Dict[str, str]:
     """Handle incoming WhatsApp webhook events"""
     try:
@@ -28,7 +28,7 @@ async def whatsapp_webhook(request: Request) -> Dict[str, str]:
         raise HTTPException(status_code=400, detail="Invalid payload")
 
 
-@webhook_router.post("/webhooks/bitsacco")
+@webhook_router.post("/bitsacco")
 async def bitsacco_webhook(request: Request) -> Dict[str, str]:
     """Handle incoming Bitsacco API webhook events"""
     try:
@@ -43,7 +43,7 @@ async def bitsacco_webhook(request: Request) -> Dict[str, str]:
         raise HTTPException(status_code=400, detail="Invalid payload")
 
 
-@webhook_router.get("/webhooks/test")
+@webhook_router.get("/test")
 async def test_webhook() -> Dict[str, str]:
     """Test webhook endpoint for development"""
     return {"message": "Webhook endpoint is working"}

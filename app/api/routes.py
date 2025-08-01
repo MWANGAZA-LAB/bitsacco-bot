@@ -7,7 +7,7 @@ from fastapi import APIRouter, HTTPException, Depends, BackgroundTasks
 from sqlalchemy.ext.asyncio import AsyncSession
 import structlog
 
-from ..database import get_db
+from ..database.session import get_database_session as get_db
 
 logger = structlog.get_logger(__name__)
 

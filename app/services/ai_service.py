@@ -32,6 +32,12 @@ class AIConversationService:
     async def start(self) -> None:
         """Start the AI service"""
         try:
+            # Check if OpenAI API key is available
+            if not settings.OPENAI_API_KEY or settings.OPENAI_API_KEY.startswith('sk-demo'):
+                logger.warning("⚠️ OpenAI API key not configured - AI features will be limited")
+                self.is_running = False
+                return
+
             # Initialize OpenAI client
             self.client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY, timeout=30.0)
 
@@ -42,8 +48,8 @@ class AIConversationService:
             logger.info("✅ AI conversation service started")
 
         except Exception as e:
-            logger.error("❌ Failed to start AI service", error=str(e))
-            raise
+            logger.warning("⚠️ AI service failed to start - continuing without AI features", error=str(e))
+            self.is_running = False
 
     async def stop(self) -> None:
         """Stop the AI service"""
