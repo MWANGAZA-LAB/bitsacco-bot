@@ -4,10 +4,11 @@ Handles voice synthesis for WhatsApp bot responses
 """
 
 import aiohttp
-from typing import Dict, Any, Optional, List
-import structlog
+import json
+from typing import Dict, List, Optional, Any
+from ..core.logger import logger
 
-logger = structlog.get_logger(__name__)
+logger = logger(__name__)
 
 
 class ElevenLabsVoiceService:

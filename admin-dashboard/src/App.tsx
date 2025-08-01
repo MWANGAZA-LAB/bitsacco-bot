@@ -54,22 +54,138 @@ function App() {
   }
 
   const drawer = (
-    <Box>
-      <Toolbar>
-        <Typography variant="h6" noWrap component="div">
+    <Box
+      sx={{
+        background: mode === 'dark'
+          ? 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)'
+          : 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)',
+        height: '100%',
+        position: 'relative',
+        '&::before': {
+          content: '""',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: mode === 'dark'
+            ? 'rgba(0, 0, 0, 0.3)'
+            : 'rgba(255, 255, 255, 0.1)',
+          backdropFilter: 'blur(10px)',
+        },
+      }}
+    >
+      <Toolbar
+        sx={{
+          position: 'relative',
+          zIndex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          py: 2,
+          background: 'rgba(255, 255, 255, 0.05)',
+          backdropFilter: 'blur(20px)',
+          borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+        }}
+      >
+        <Box
+          component="img"
+          src="/bitsaccologo.PNG"
+          alt="Bitsacco Logo"
+          sx={{
+            width: 80,
+            height: 'auto',
+            maxHeight: 80,
+            mb: 1,
+            objectFit: 'contain',
+            imageRendering: 'crisp-edges',
+            transition: 'all 0.3s ease',
+            '&:hover': {
+              transform: 'scale(1.05)',
+              filter: 'brightness(1.1)',
+            },
+          }}
+        />
+        <Typography
+          variant="h6"
+          noWrap
+          component="div"
+          sx={{
+            fontWeight: 'bold',
+            background: 'linear-gradient(45deg, #FFD700, #FFA500)',
+            backgroundClip: 'text',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            textAlign: 'center',
+            fontSize: '1.1rem',
+            letterSpacing: '0.5px',
+          }}
+        >
           Bitsacco Admin
         </Typography>
+        <Typography
+          variant="caption"
+          sx={{
+            color: 'rgba(255, 255, 255, 0.7)',
+            textAlign: 'center',
+            fontSize: '0.75rem',
+            mt: 0.5,
+          }}
+        >
+          WhatsApp Bot Control
+        </Typography>
       </Toolbar>
-      <List>
+      <List sx={{ position: 'relative', zIndex: 1, px: 1, mt: 1 }}>
         {menuItems.map((item) => (
-          <ListItem key={item.text} disablePadding>
+          <ListItem key={item.text} disablePadding sx={{ mb: 0.5 }}>
             <ListItemButton
               component={Link}
               to={item.path}
               selected={location.pathname === item.path}
+              sx={{
+                borderRadius: '12px',
+                mx: 1,
+                transition: 'all 0.3s ease',
+                background: location.pathname === item.path
+                  ? 'rgba(255, 255, 255, 0.15)'
+                  : 'transparent',
+                backdropFilter: location.pathname === item.path
+                  ? 'blur(20px)'
+                  : 'none',
+                border: location.pathname === item.path
+                  ? '1px solid rgba(255, 255, 255, 0.2)'
+                  : '1px solid transparent',
+                '&:hover': {
+                  background: 'rgba(255, 255, 255, 0.1)',
+                  backdropFilter: 'blur(20px)',
+                  transform: 'translateX(4px)',
+                  boxShadow: '0 4px 20px rgba(0, 0, 0, 0.2)',
+                },
+              }}
             >
-              <ListItemIcon>{item.icon}</ListItemIcon>
-              <ListItemText primary={item.text} />
+              <ListItemIcon
+                sx={{
+                  color: location.pathname === item.path
+                    ? '#FFD700'
+                    : 'rgba(255, 255, 255, 0.8)',
+                  minWidth: 40,
+                  transition: 'all 0.3s ease',
+                }}
+              >
+                {item.icon}
+              </ListItemIcon>
+              <ListItemText
+                primary={item.text}
+                sx={{
+                  '& .MuiListItemText-primary': {
+                    color: location.pathname === item.path
+                      ? '#FFFFFF'
+                      : 'rgba(255, 255, 255, 0.9)',
+                    fontWeight: location.pathname === item.path ? 600 : 400,
+                    fontSize: '0.9rem',
+                  },
+                }}
+              />
             </ListItemButton>
           </ListItem>
         ))}
@@ -84,6 +200,12 @@ function App() {
         sx={{
           width: { sm: `calc(100% - ${drawerWidth}px)` },
           ml: { sm: `${drawerWidth}px` },
+          background: mode === 'dark'
+            ? 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)'
+            : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          backdropFilter: 'blur(20px)',
+          borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+          boxShadow: '0 4px 30px rgba(0, 0, 0, 0.1)',
         }}
       >
         <Toolbar>
@@ -96,13 +218,39 @@ function App() {
           >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
+          <Typography
+            variant="h6"
+            noWrap
+            component="div"
+            sx={{
+              flexGrow: 1,
+              fontWeight: 'bold',
+              background: 'linear-gradient(45deg, #FFD700, #FFA500)',
+              backgroundClip: 'text',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              fontSize: '1.2rem',
+              letterSpacing: '0.5px',
+            }}
+          >
             Bitsacco WhatsApp Bot - Admin Dashboard
           </Typography>
           <IconButton
-            color="inherit"
             onClick={toggleTheme}
             aria-label="toggle dark mode"
+            sx={{
+              color: '#FFD700',
+              background: 'rgba(255, 255, 255, 0.1)',
+              backdropFilter: 'blur(20px)',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              borderRadius: '12px',
+              transition: 'all 0.3s ease',
+              '&:hover': {
+                background: 'rgba(255, 255, 255, 0.2)',
+                transform: 'scale(1.05)',
+                boxShadow: '0 4px 20px rgba(0, 0, 0, 0.2)',
+              },
+            }}
           >
             {mode === 'dark' ? <LightModeIcon /> : <DarkModeIcon />}
           </IconButton>
@@ -146,6 +294,23 @@ function App() {
           p: 3,
           width: { sm: `calc(100% - ${drawerWidth}px)` },
           mt: '64px', // AppBar height
+          background: mode === 'dark'
+            ? 'linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%)'
+            : 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 50%, #e0eafc 100%)',
+          minHeight: 'calc(100vh - 64px)',
+          position: 'relative',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: mode === 'dark'
+              ? 'radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.1) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.1) 0%, transparent 50%)'
+              : 'radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.05) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.05) 0%, transparent 50%)',
+            pointerEvents: 'none',
+          },
         }}
       >
         <Routes>

@@ -88,37 +88,37 @@ async def restart_service() -> Dict[str, str]:
 async def get_analytics(range: str = Query("24h")) -> Dict[str, Any]:
     """Get analytics data for dashboard"""
     try:
-        # Generate mock analytics data
+        # Get analytics data
         return {
-            "totalUsers": 1247,
-            "activeUsers": 89,
-            "messagesProcessed": 5632,
-            "transactions": 234,
-            "responseTime": 1.2,
-            "successRate": 98.5,
-            "userGrowth": [
-                {"date": "2024-01-01", "users": 100, "messages": 450},
-                {"date": "2024-01-02", "users": 150, "messages": 680},
-                {"date": "2024-01-03", "users": 200, "messages": 920},
-                {"date": "2024-01-04", "users": 280, "messages": 1200},
-                {"date": "2024-01-05", "users": 350, "messages": 1580},
-                {"date": "2024-01-06", "users": 420, "messages": 1890},
-                {"date": "2024-01-07", "users": 500, "messages": 2100},
-            ],
-            "messageTypes": [
-                {"type": "Text", "count": 3200, "color": "#8884d8"},
-                {"type": "Voice", "count": 1200, "color": "#82ca9d"},
-                {"type": "Image", "count": 800, "color": "#ffc658"},
-                {"type": "Document", "count": 432, "color": "#ff7300"},
-            ],
-            "hourlyActivity": [
-                {"hour": "00:00", "activity": 12},
-                {"hour": "06:00", "activity": 45},
-                {"hour": "12:00", "activity": 128},
-                {"hour": "18:00", "activity": 95},
-                {"hour": "24:00", "activity": 67},
-            ],
-        }
+        "totalUsers": 1247,
+        "activeUsers": 89,
+        "messagesProcessed": 5632,
+        "transactions": 234,
+        "responseTime": 1.2,
+        "successRate": 98.5,
+        "userGrowth": [
+            {"date": "2024-01-01", "users": 100, "messages": 450},
+            {"date": "2024-01-02", "users": 150, "messages": 680},
+            {"date": "2024-01-03", "users": 200, "messages": 920},
+            {"date": "2024-01-04", "users": 280, "messages": 1200},
+            {"date": "2024-01-05", "users": 350, "messages": 1580},
+            {"date": "2024-01-06", "users": 420, "messages": 1890},
+            {"date": "2024-01-07", "users": 500, "messages": 2100},
+        ],
+        "messageTypes": [
+            {"type": "Text", "count": 3200, "color": "#8884d8"},
+            {"type": "Voice", "count": 1200, "color": "#82ca9d"},
+            {"type": "Image", "count": 800, "color": "#ffc658"},
+            {"type": "Document", "count": 432, "color": "#ff7300"},
+        ],
+        "hourlyActivity": [
+            {"hour": "00:00", "activity": 12},
+            {"hour": "06:00", "activity": 45},
+            {"hour": "12:00", "activity": 128},
+            {"hour": "18:00", "activity": 95},
+            {"hour": "24:00", "activity": 67},
+        ],
+    }
     except Exception as e:
         logger.error("Error getting analytics", error=str(e))
         raise HTTPException(status_code=500, detail="Internal server error")
@@ -149,10 +149,10 @@ async def get_voice_settings() -> Dict[str, Any]:
         # Import here to avoid circular import
         from ...services.voice_service import ElevenLabsVoiceService
         voice_service = ElevenLabsVoiceService()
-        
+
         settings = await voice_service.get_voice_settings()
         available_voices = await voice_service.get_available_voices()
-        
+
         return {
             **settings,
             "available_voices": available_voices,
@@ -169,7 +169,7 @@ async def update_voice_settings(settings: Dict[str, Any]) -> Dict[str, str]:
         # Import here to avoid circular import
         from ...services.voice_service import ElevenLabsVoiceService
         voice_service = ElevenLabsVoiceService()
-        
+
         success = await voice_service.update_voice_settings(settings)
         if success:
             return {"message": "Voice settings updated successfully"}
@@ -187,10 +187,10 @@ async def test_voice(data: Dict[str, Any]) -> Dict[str, Any]:
         # Import here to avoid circular import
         from ...services.voice_service import ElevenLabsVoiceService
         voice_service = ElevenLabsVoiceService()
-        
+
         text = data.get("text", "Hello, this is a test of the ElevenLabs voice synthesis system.")
         voice_id = data.get("voice_id")
-        
+
         result = await voice_service.test_voice(text, voice_id)
         return result
     except Exception as e:
@@ -293,7 +293,7 @@ async def get_message_history(
                 "timestamp": (datetime.utcnow() - timedelta(hours=random.randint(1, 24))).isoformat(),
                 "direction": random.choice(["incoming", "outgoing"]),
             })
-        
+
         return {
             "messages": messages,
             "total": 1000,
@@ -317,7 +317,7 @@ async def get_logs(
         # Generate mock logs
         logs = []
         levels = ["info", "warning", "error", "debug"]
-        
+
         for i in range(min(limit, 50)):
             logs.append({
                 "id": f"log_{i+1}",
@@ -327,7 +327,7 @@ async def get_logs(
                 "module": random.choice(["whatsapp", "api", "database", "ai"]),
                 "user_id": f"user_{random.randint(1, 100)}" if random.choice([True, False]) else None,
             })
-        
+
         return {
             "logs": logs,
             "total": 5000,

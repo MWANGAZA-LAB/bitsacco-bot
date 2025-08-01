@@ -110,8 +110,8 @@ class TestAIService:
         )
 
         message_context = MessageContext(
-            original_message="Hello", 
-            message_type=MessageType.TEXT, 
+            original_message="Hello",
+            message_type=MessageType.TEXT,
             timestamp=datetime.utcnow()
         )
 
