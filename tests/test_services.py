@@ -45,7 +45,9 @@ class TestUserService:
     @pytest.mark.asyncio
     async def test_start_authentication_success(self, user_service):
         """Test successful authentication start"""
-        success, message = await user_service.start_authentication("+254700000000")
+        success, message = await user_service.start_authentication(
+            "+254700000000"
+        )
 
         assert success is True
         assert "Verification Code Sent" in message

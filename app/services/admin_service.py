@@ -37,7 +37,8 @@ class AdminService:
             user_sessions = self.user_service.user_sessions
             total_users = len(user_sessions)
             active_users = sum(
-                1 for session in user_sessions.values() if session.is_authenticated
+                1 for session in user_sessions.values()
+                if session.is_authenticated
             )
 
             # Get system metrics
@@ -77,7 +78,9 @@ class AdminService:
                             "total": disk.total if disk else 0,
                             "free": disk.free if disk else 0,
                             "used": disk.used if disk else 0,
-                            "percent": ((disk.used / disk.total * 100) if disk else 0),
+                            "percent": (
+                                (disk.used / disk.total * 100) if disk else 0
+                            ),
                         }
                         if disk
                         else None

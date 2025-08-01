@@ -4,12 +4,8 @@ Handles voice synthesis for WhatsApp bot responses
 """
 
 import aiohttp
-import asyncio
 from typing import Dict, Any, Optional, List
 import structlog
-from io import BytesIO
-
-from ..config import settings
 
 logger = structlog.get_logger(__name__)
 
@@ -22,7 +18,7 @@ class ElevenLabsVoiceService:
         self.base_url = "https://api.elevenlabs.io/v1"
         self.is_running = False
         self.available_voices = []
-        
+
         # Default voice settings
         self.default_settings = {
             "voice_id": "21m00Tcm4TlvDq8ikWAM",  # Rachel voice
@@ -41,12 +37,11 @@ class ElevenLabsVoiceService:
             if not self.api_key:
                 logger.warning("⚠️ ElevenLabs API key not configured")
                 return
-                
+
             # Test connection and load voices
             await self._load_available_voices()
             self.is_running = True
             logger.info("✅ ElevenLabs voice service started")
-            
         except Exception as e:
             logger.warning("⚠️ Voice service failed to start", error=str(e))
             self.is_running = False
@@ -63,25 +58,28 @@ class ElevenLabsVoiceService:
                 "Accept": "application/json",
                 "xi-api-key": self.api_key
             }
-            
+
             async with aiohttp.ClientSession() as session:
                 async with session.get(
-                    f"{self.base_url}/voices", 
+                    f"{self.base_url}/voices",
                     headers=headers
                 ) as response:
                     if response.status == 200:
                         data = await response.json()
                         self.available_voices = data.get("voices", [])
-                        logger.info(f"Loaded {len(self.available_voices)} voices")
+                        logger.info(
+                            f"Loaded {len(self.available_voices)} voices"
+                        )
                     else:
-                        logger.error(f"Failed to load voices: {response.status}")
-                        
+                        logger.error(
+                            f"Failed to load voices: {response.status}"
+                        )
         except Exception as e:
             logger.error("Error loading voices", error=str(e))
 
     async def synthesize_speech(
-        self, 
-        text: str, 
+        self,
+        text: str,
         voice_id: Optional[str] = None,
         voice_settings: Optional[Dict[str, Any]] = None
     ) -> Optional[bytes]:
@@ -90,22 +88,23 @@ class ElevenLabsVoiceService:
             if not self.is_running:
                 logger.warning("Voice service not running")
                 return None
-                
+
             voice_id = voice_id or self.default_settings["voice_id"]
-            settings_to_use = voice_settings or self.default_settings["voice_settings"]
-            
+            settings_to_use = (
+                voice_settings or self.default_settings["voice_settings"]
+            )
             headers = {
                 "Accept": "audio/mpeg",
                 "Content-Type": "application/json",
                 "xi-api-key": self.api_key
             }
-            
+
             data = {
                 "text": text,
                 "model_id": self.default_settings["model_id"],
                 "voice_settings": settings_to_use
             }
-            
+
             async with aiohttp.ClientSession() as session:
                 async with session.post(
                     f"{self.base_url}/text-to-speech/{voice_id}",
@@ -114,13 +113,17 @@ class ElevenLabsVoiceService:
                 ) as response:
                     if response.status == 200:
                         audio_data = await response.read()
-                        logger.info(f"Generated audio for text: {text[:50]}...")
+                        logger.info(
+                            f"Generated audio for text: {text[:50]}..."
+                        )
                         return audio_data
                     else:
                         error_text = await response.text()
-                        logger.error(f"Voice synthesis failed: {response.status} - {error_text}")
+                        logger.error(
+                            f"Voice synthesis failed: {response.status} - "
+                            f"{error_text}"
+                        )
                         return None
-                        
         except Exception as e:
             logger.error("Error synthesizing speech", error=str(e))
             return None
@@ -129,7 +132,6 @@ class ElevenLabsVoiceService:
         """Get list of available voices"""
         if not self.available_voices:
             await self._load_available_voices()
-            
         return [
             {
                 "id": voice.get("voice_id"),
@@ -143,14 +145,13 @@ class ElevenLabsVoiceService:
         ]
 
     async def test_voice(
-        self, 
+        self,
         text: str = "Hello, this is a test of the voice synthesis system.",
         voice_id: Optional[str] = None
     ) -> Dict[str, Any]:
         """Test voice synthesis"""
         try:
             audio_data = await self.synthesize_speech(text, voice_id)
-            
             if audio_data:
                 return {
                     "success": True,
@@ -164,7 +165,6 @@ class ElevenLabsVoiceService:
                     "message": "Voice synthesis failed",
                     "text": text
                 }
-                
         except Exception as e:
             logger.error("Voice test failed", error=str(e))
             return {
@@ -184,20 +184,21 @@ class ElevenLabsVoiceService:
             "available_voices_count": len(self.available_voices)
         }
 
-    async def update_voice_settings(self, new_settings: Dict[str, Any]) -> bool:
+    async def update_voice_settings(
+        self, new_settings: Dict[str, Any]
+    ) -> bool:
         """Update voice settings"""
         try:
             if "voice_id" in new_settings:
                 self.default_settings["voice_id"] = new_settings["voice_id"]
-                
+
             if "voice_settings" in new_settings:
                 self.default_settings["voice_settings"].update(
                     new_settings["voice_settings"]
                 )
-                
+
             logger.info("Voice settings updated", settings=new_settings)
             return True
-            
         except Exception as e:
             logger.error("Error updating voice settings", error=str(e))
             return False
