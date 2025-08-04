@@ -59,10 +59,12 @@ async def detailed_health_check() -> Dict[str, Any]:
             },
             "environment": {
                 "debug": settings.DEBUG,
-                "database_url": (settings.DATABASE_URL.split("://")[0] + "://***"),
+                "database_url": (
+                    settings.DATABASE_URL.split("://")[0] + "://***"
+                ),
             },
         }
-    except Exception as e:
+    except (psutil.Error, AttributeError, ValueError) as e:
         return {
             "status": "degraded",
             "timestamp": datetime.utcnow().isoformat(),

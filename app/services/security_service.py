@@ -58,13 +58,25 @@ class SecurityService:
 
         # Configuration
         self.rate_limits = {
-            "authentication": {"requests": 5, "window": 300},  # 5 attempts per 5 min
-            "api_calls": {"requests": 100, "window": 60},  # 100 calls per minute
-            "otp_requests": {"requests": 3, "window": 600},  # 3 OTP per 10 min
+            "authentication": {
+                "requests": 5,
+                "window": 300,
+            },  # 5 attempts per 5 min
+            "api_calls": {
+                "requests": 100,
+                "window": 60,
+            },  # 100 calls per minute
+            "otp_requests": {
+                "requests": 3,
+                "window": 600,
+            },  # 3 OTP per 10 min
         }
 
     async def validate_request(
-        self, request_type: str, identifier: str, source_ip: Optional[str] = None
+        self,
+        request_type: str,
+        identifier: str,
+        source_ip: Optional[str] = None
     ) -> tuple[bool, Optional[str]]:
         """Validate incoming request against security policies"""
 
@@ -82,7 +94,9 @@ class SecurityService:
             return False, "Access denied"
 
         # Check rate limits
-        rate_limit_check = await self._check_rate_limit(request_type, identifier)
+        rate_limit_check = await self._check_rate_limit(
+            request_type, identifier
+        )
         if not rate_limit_check:
             await self._log_security_event(
                 "rate_limit_exceeded",
@@ -116,7 +130,9 @@ class SecurityService:
             logger.error("Decryption failed", error=str(e))
             raise
 
-    async def generate_secure_token(self, user_id: str, expires_in: int = 3600) -> str:
+    async def generate_secure_token(
+        self, user_id: str, expires_in: int = 3600
+    ) -> str:
         """Generate secure JWT token"""
         payload = {
             "user_id": user_id,
@@ -198,12 +214,18 @@ class SecurityService:
             "security_events_24h": len(recent_events),
             "threat_levels": threat_counts,
             "rate_limit_violations": len(
-                [e for e in recent_events if e.event_type == "rate_limit_exceeded"]
+                [
+                    e
+                    for e in recent_events
+                    if e.event_type == "rate_limit_exceeded"
+                ]
             ),
             "last_updated": datetime.utcnow().isoformat(),
         }
 
-    async def _check_rate_limit(self, request_type: str, identifier: str) -> bool:
+    async def _check_rate_limit(
+        self, request_type: str, identifier: str
+    ) -> bool:
         """Check if request is within rate limits"""
         if request_type not in self.rate_limits:
             return True

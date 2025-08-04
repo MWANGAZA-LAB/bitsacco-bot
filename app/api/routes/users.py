@@ -16,9 +16,7 @@ users_router = APIRouter(tags=["Users"])
 
 
 @users_router.get("/")
-async def list_users(
-    db: AsyncSession = Depends(get_database_session),
-) -> Dict[str, Any]:
+async def list_users() -> Dict[str, Any]:
     """List all registered users"""
     try:
         # Implementation would query database for users
@@ -30,12 +28,14 @@ async def list_users(
         }
     except Exception as e:
         logger.error("Error listing users", error=str(e))
-        raise HTTPException(status_code=500, detail="Internal server error")
+        raise HTTPException(
+            status_code=500, detail="Internal server error"
+        ) from e
 
 
 @users_router.get("/{user_id}")
 async def get_user(
-    user_id: str, db: AsyncSession = Depends(get_database_session)
+    user_id: str
 ) -> Dict[str, Any]:
     """Get user details by ID"""
     try:
@@ -59,4 +59,6 @@ async def delete_user(
         return {"message": f"User {user_id} deleted successfully"}
     except Exception as e:
         logger.error("Error deleting user", user_id=user_id, error=str(e))
-        raise HTTPException(status_code=500, detail="Internal server error")
+        raise HTTPException(
+            status_code=500, detail="Internal server error"
+        ) from e

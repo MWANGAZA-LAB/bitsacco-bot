@@ -83,7 +83,9 @@ class UserService:
             state=session.current_state.value,
         )
 
-    async def start_authentication(self, phone_number: str) -> tuple[bool, str]:
+    async def start_authentication(
+        self, phone_number: str
+    ) -> tuple[bool, str]:
         """Start phone number authentication process"""
         try:
             session = await self.get_or_create_session(phone_number)
@@ -132,22 +134,33 @@ _The code expires in 5 minutes_
                 """.strip(),
                 )
             else:
-                return (False, "❌ Failed to send verification code. Please try again.")
+                return (
+                    False,
+                    "❌ Failed to send verification code. Please try again."
+                )
 
         except Exception as e:
             logger.error(
-                "Error starting authentication", user=phone_number, error=str(e)
+                "Error starting authentication",
+                user=phone_number,
+                error=str(e),
             )
             return False, "❌ Authentication error. Please try again later."
 
-    async def verify_otp(self, phone_number: str, otp_code: str) -> tuple[bool, str]:
+    async def verify_otp(
+        self, phone_number: str, otp_code: str
+    ) -> tuple[bool, str]:
         """Verify OTP code"""
         try:
             session = await self.get_or_create_session(phone_number)
 
             # Check if user is in correct state
             if session.current_state != UserState.WAITING_FOR_OTP:
-                return (False, "❌ No verification in progress. Type 'start' to begin.")
+                return (
+                    False,
+                    "❌ No verification in progress. "
+                    "Type 'start' to begin."
+                )
 
             # Check OTP timeout
             if session.otp_sent_at:
@@ -164,7 +177,9 @@ _The code expires in 5 minutes_
                     )
 
             # Verify OTP with Bitsacco API
-            is_valid = await self.bitsacco_api.verify_otp(phone_number, otp_code)
+            is_valid = await self.bitsacco_api.verify_otp(
+                phone_number, otp_code
+            )
 
             if is_valid:
                 # Authentication successful
@@ -194,7 +209,11 @@ Type 'help' to see all available commands.
                 return False, "❌ Invalid verification code. Please try again."
 
         except Exception as e:
-            logger.error("Error verifying OTP", user=phone_number, error=str(e))
+            logger.error(
+                "Error verifying OTP",
+                user=phone_number,
+                error=str(e)
+            )
             return False, "❌ Verification error. Please try again."
 
     async def logout_user(self, phone_number: str) -> str:
@@ -241,17 +260,26 @@ _Keep your account secure and never share your verification codes!_
 
                 return profile_info
             else:
-                return "❌ Unable to fetch profile information. " "Please try again."
+                return (
+                    "❌ Unable to fetch profile information. "
+                    "Please try again."
+                )
 
         except Exception as e:
-            logger.error("Error getting user profile", user=phone_number, error=str(e))
+            logger.error(
+                "Error getting user profile",
+                user=phone_number,
+                error=str(e)
+            )
             return "❌ Error fetching profile. Please try again."
 
     async def health_check(self) -> Dict[str, Any]:
         """Health check for monitoring"""
         active_sessions = len(self.user_sessions)
         authenticated_sessions = sum(
-            1 for session in self.user_sessions.values() if session.is_authenticated
+            1
+            for session in self.user_sessions.values()
+            if session.is_authenticated
         )
 
         return {

@@ -1,17 +1,17 @@
 # Docker Compose for Bitsacco WhatsApp Bot
-version: '3.8'
+version: "3.8"
 
 services:
   bot:
     build: .
     ports:
       - "8000:8000"
-    environment:
-      - DATABASE_URL=sqlite+aiosqlite:///./data/bitsacco_bot.db
-      - REDIS_URL=redis://redis:6379/0
+    env_file:
+      - .env.docker
     volumes:
       - ./data:/app/data
-      - ./.env:/app/.env
+      - ./logs:/app/logs
+      - ./.env.docker:/app/.env
     depends_on:
       - redis
     restart: unless-stopped

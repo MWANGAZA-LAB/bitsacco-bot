@@ -128,7 +128,9 @@ class MonitoringService:
         recent_metrics = self._get_recent_metrics(minutes=5)
 
         return {
-            "status": ("healthy" if len(self.active_alerts) == 0 else "degraded"),
+            "status": (
+                "healthy" if len(self.active_alerts) == 0 else "degraded"
+            ),
             "active_alerts": len(self.active_alerts),
             "critical_alerts": len(
                 [
@@ -199,8 +201,15 @@ class MonitoringService:
 
                 await asyncio.sleep(300)  # Process every 5 minutes
 
-            except Exception as e:
+            except (asyncio.CancelledError, psutil.Error) as e:
                 logger.error("Error processing alerts", error=str(e))
+                await asyncio.sleep(600)
+            except Exception as e:
+                # Catch-all for unexpected errors; consider logging and
+                # monitoring this
+                logger.error(
+                    "Unexpected error processing alerts", error=str(e)
+                )
                 await asyncio.sleep(600)
 
     async def _check_metric_thresholds(self, metric: SystemMetric) -> None:
@@ -233,7 +242,6 @@ class MonitoringService:
         # - Email alerts
         # - SMS for critical alerts
         # - PagerDuty/OpsGenie
-        pass
 
     def _get_recent_metrics(self, minutes: int = 5) -> List[SystemMetric]:
         """Get metrics from recent time window"""

@@ -28,7 +28,9 @@ async def admin_health() -> Dict[str, Any]:
         }
     except Exception as e:
         logger.error("Admin health check failed", error=str(e))
-        raise HTTPException(status_code=500, detail="Health check failed")
+        raise HTTPException(
+            status_code=500, detail="Health check failed"
+        ) from e
 
 
 @admin_router.get("/status")
@@ -60,7 +62,9 @@ async def system_info() -> Dict[str, Any]:
         }
     except Exception as e:
         logger.error("Failed to get system info", error=str(e))
-        raise HTTPException(status_code=500, detail="Failed to get system info") from e
+        raise HTTPException(
+            status_code=500, detail="Failed to get system info"
+        ) from e
 
 
 @admin_router.get("/admin/stats")
@@ -73,7 +77,9 @@ async def get_system_stats() -> Dict[str, Any]:
         }
     except Exception as e:
         logger.error("Error getting system stats", error=str(e))
-        raise HTTPException(status_code=500, detail="Internal server error")
+        raise HTTPException(
+            status_code=500, detail="Internal server error"
+        ) from e
 
 
 @admin_router.post("/admin/restart")
@@ -84,7 +90,9 @@ async def restart_service() -> Dict[str, str]:
         return {"message": "Service restart initiated"}
     except Exception as e:
         logger.error("Error restarting service", error=str(e))
-        raise HTTPException(status_code=500, detail="Internal server error")
+        raise HTTPException(
+            status_code=500, detail="Internal server error"
+        ) from e
 
 
 # Analytics endpoints
@@ -125,7 +133,9 @@ async def get_analytics(range: str = Query("24h")) -> Dict[str, Any]:
         }
     except Exception as e:
         logger.error("Error getting analytics", error=str(e))
-        raise HTTPException(status_code=500, detail="Internal server error")
+        raise HTTPException(
+            status_code=500, detail="Internal server error"
+        ) from e
 
 
 @admin_router.get("/metrics")
@@ -142,7 +152,9 @@ async def get_metrics() -> Dict[str, Any]:
         }
     except Exception as e:
         logger.error("Error getting metrics", error=str(e))
-        raise HTTPException(status_code=500, detail="Internal server error")
+        raise HTTPException(
+            status_code=500, detail="Internal server error"
+            ) from e
 
 
 # Voice settings endpoints (placeholder - voice service removed)
@@ -157,7 +169,9 @@ async def get_voice_settings() -> Dict[str, Any]:
         }
     except Exception as e:
         logger.error("Error getting voice settings", error=str(e))
-        raise HTTPException(status_code=500, detail="Internal server error")
+        raise HTTPException(
+            status_code=500, detail="Internal server error"
+            ) from e
 
 
 @admin_router.put("/voice/settings")
@@ -168,7 +182,9 @@ async def update_voice_settings(settings: Dict[str, Any]) -> Dict[str, str]:
         return {"message": "Voice service not available"}
     except Exception as e:
         logger.error("Error updating voice settings", error=str(e))
-        raise HTTPException(status_code=500, detail="Internal server error")
+        raise HTTPException(
+            status_code=500, detail="Internal server error"
+            ) from e
 
 
 @admin_router.post("/voice/test")
@@ -182,7 +198,9 @@ async def test_voice(data: Dict[str, Any]) -> Dict[str, Any]:
         }
     except Exception as e:
         logger.error("Error testing voice", error=str(e))
-        raise HTTPException(status_code=500, detail="Internal server error")
+        raise HTTPException(
+            status_code=500, detail="Internal server error"
+            ) from e
 
 
 # System settings endpoints
@@ -216,7 +234,9 @@ async def get_settings() -> Dict[str, Any]:
         }
     except Exception as e:
         logger.error("Error getting settings", error=str(e))
-        raise HTTPException(status_code=500, detail="Internal server error")
+        raise HTTPException(
+            status_code=500, detail="Internal server error"
+            ) from e
 
 
 @admin_router.put("/settings")
@@ -227,7 +247,9 @@ async def update_settings(settings: Dict[str, Any]) -> Dict[str, str]:
         return {"message": "Settings updated successfully"}
     except Exception as e:
         logger.error("Error updating settings", error=str(e))
-        raise HTTPException(status_code=500, detail="Internal server error")
+        raise HTTPException(
+            status_code=500, detail="Internal server error"
+            ) from e
 
 
 # WhatsApp service endpoints
@@ -245,7 +267,9 @@ async def get_whatsapp_status() -> Dict[str, Any]:
         }
     except Exception as e:
         logger.error("Error getting WhatsApp status", error=str(e))
-        raise HTTPException(status_code=500, detail="Internal server error")
+        raise HTTPException(
+            status_code=500, detail="Internal server error"
+            ) from e
 
 
 @admin_router.post("/whatsapp/restart")
@@ -256,7 +280,9 @@ async def restart_whatsapp_service() -> Dict[str, str]:
         return {"message": "WhatsApp service restart initiated"}
     except Exception as e:
         logger.error("Error restarting WhatsApp service", error=str(e))
-        raise HTTPException(status_code=500, detail="Internal server error")
+        raise HTTPException(
+            status_code=500, detail="Internal server error"
+            ) from e
 
 
 # Message history endpoint
@@ -275,11 +301,14 @@ async def get_message_history(
                 {
                     "id": f"msg_{i+1}",
                     "user_id": user_id or f"user_{random.randint(1, 100)}",
-                    "phone_number": f"+25470{random.randint(1000000, 9999999)}",
+                    "phone_number": (
+                        f"+25470{random.randint(1000000, 9999999)}"
+                    ),
                     "message": f"Sample message {i+1}",
                     "type": random.choice(["text", "voice", "image"]),
                     "timestamp": (
-                        datetime.utcnow() - timedelta(hours=random.randint(1, 24))
+                        datetime.utcnow()
+                        - timedelta(hours=random.randint(1, 24))
                     ).isoformat(),
                     "direction": random.choice(["incoming", "outgoing"]),
                 }
@@ -294,7 +323,9 @@ async def get_message_history(
         }
     except Exception as e:
         logger.error("Error getting message history", error=str(e))
-        raise HTTPException(status_code=500, detail="Internal server error")
+        raise HTTPException(
+            status_code=500, detail="Internal server error"
+            ) from e
 
 
 # System logs endpoint
@@ -315,9 +346,12 @@ async def get_logs(
                     "level": random.choice(levels),
                     "message": f"Sample log message {i+1}",
                     "timestamp": (
-                        datetime.utcnow() - timedelta(minutes=random.randint(1, 60))
+                        datetime.utcnow()
+                        - timedelta(minutes=random.randint(1, 60))
                     ).isoformat(),
-                    "module": random.choice(["whatsapp", "api", "database", "ai"]),
+                    "module": random.choice(
+                        ["whatsapp", "api", "database", "ai"]
+                    ),
                     "user_id": (
                         f"user_{random.randint(1, 100)}"
                         if random.choice([True, False])
@@ -334,4 +368,5 @@ async def get_logs(
         }
     except Exception as e:
         logger.error("Error getting logs", error=str(e))
-        raise HTTPException(status_code=500, detail="Internal server error")
+        raise HTTPException(
+            status_code=500, detail="Internal server error") from e

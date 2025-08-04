@@ -5,19 +5,8 @@ Optimized database operations with Redis caching layer
 
 import json
 from datetime import datetime, timedelta
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, Optional, List, TYPE_CHECKING
 import structlog
-
-from typing import TYPE_CHECKING
-
-try:
-    import redis.asyncio as aioredis
-
-    REDIS_AVAILABLE = True
-except ImportError:
-    if TYPE_CHECKING:
-        import redis.asyncio as aioredis  # type: ignore
-    REDIS_AVAILABLE = False
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import text, select, func
@@ -28,6 +17,15 @@ from ..database.models import (
     BitcoinPriceModel,
 )
 
+# Handle optional Redis support
+try:
+    import redis.asyncio as aioredis
+    REDIS_AVAILABLE = True
+except ImportError:
+    if TYPE_CHECKING:
+        import redis.asyncio as aioredis  # type: ignore
+    REDIS_AVAILABLE = False
+
 logger = structlog.get_logger(__name__)
 
 
@@ -36,8 +34,8 @@ class CacheService:
 
     def __init__(self, redis_url: str = "redis://localhost:6379/0"):
         self.redis_url = redis_url
-        self.redis: Any = None  # Type: aioredis.Redis when available
-        self.default_ttl = 3600  # 1 hour default TTL
+        self.redis: Optional[Any] = None  # Will be aioredis.Redis if available
+        self.default_ttl = 3600  # Default time-to-live: 1 hour
 
     async def start(self) -> None:
         """Initialize Redis connection"""
@@ -46,15 +44,11 @@ class CacheService:
             return
 
         try:
-            if aioredis:
-                self.redis = await aioredis.from_url(
-                    self.redis_url, encoding="utf-8", decode_responses=True
-                )
-
-                # Test connection
-                await self.redis.ping()
-                logger.info("✅ Redis cache service started")
-
+            self.redis = await aioredis.from_url(
+                self.redis_url, encoding="utf-8", decode_responses=True
+            )
+            await self.redis.ping()
+            logger.info("✅ Redis cache service started")
         except Exception as e:
             logger.error("Failed to start Redis cache", error=str(e))
             self.redis = None
@@ -79,7 +73,9 @@ class CacheService:
 
         return None
 
-    async def set(self, key: str, value: Any, ttl: Optional[int] = None) -> bool:
+    async def set(
+        self, key: str, value: Any, ttl: Optional[int] = None
+    ) -> bool:
         """Set value in cache"""
         if not self.redis:
             return False
@@ -108,7 +104,7 @@ class CacheService:
         return False
 
     async def health_check(self) -> Dict[str, Any]:
-        """Check cache health"""
+        """Check Redis cache health"""
         if not self.redis:
             return {"status": "disabled", "redis_available": False}
 
@@ -132,7 +128,7 @@ class CacheService:
 
 
 class DatabaseService:
-    """Production database service with caching"""
+    """Production database service with Redis caching"""
 
     def __init__(self, cache_service: CacheService):
         self.cache = cache_service
@@ -142,17 +138,12 @@ class DatabaseService:
     ) -> Optional[UserSessionModel]:
         """Get user session with caching"""
         cache_key = f"user_session:{phone_number}"
-
-        # Try cache first
         cached_data = await self.cache.get(cache_key)
+
         if cached_data:
             logger.debug("User session cache hit", phone=phone_number)
-            # Convert back to model instance
-            # Note: This is simplified -
-            # in production you'd use proper serialization
             return UserSessionModel(**cached_data)
 
-        # Query database
         result = await session.execute(
             select(UserSessionModel).where(
                 UserSessionModel.phone_number == phone_number
@@ -161,7 +152,6 @@ class DatabaseService:
         user_session = result.scalar_one_or_none()
 
         if user_session:
-            # Cache the result
             cache_data = {
                 "phone_number": user_session.phone_number,
                 "is_authenticated": user_session.is_authenticated,
@@ -169,7 +159,7 @@ class DatabaseService:
                 "created_at": user_session.created_at.isoformat(),
                 "last_activity": user_session.last_activity.isoformat(),
             }
-            await self.cache.set(cache_key, cache_data, ttl=1800)  # 30 min
+            await self.cache.set(cache_key, cache_data, ttl=1800)
             logger.debug("User session cached", phone=phone_number)
 
         return user_session
@@ -179,14 +169,12 @@ class DatabaseService:
     ) -> Optional[BitcoinPriceModel]:
         """Get latest Bitcoin price with caching"""
         cache_key = "bitcoin_price:latest"
-
-        # Try cache first
         cached_price = await self.cache.get(cache_key)
+
         if cached_price:
             logger.debug("Bitcoin price cache hit")
             return BitcoinPriceModel(**cached_price)
 
-        # Query database
         result = await session.execute(
             select(BitcoinPriceModel)
             .order_by(BitcoinPriceModel.timestamp.desc())
@@ -195,7 +183,6 @@ class DatabaseService:
         price_model = result.scalar_one_or_none()
 
         if price_model:
-            # Cache for shorter time (prices change frequently)
             cache_data = {
                 "price_usd": price_model.price_usd,
                 "price_kes": price_model.price_kes,
@@ -204,7 +191,7 @@ class DatabaseService:
                 "timestamp": price_model.timestamp.isoformat(),
                 "source": price_model.source,
             }
-            await self.cache.set(cache_key, cache_data, ttl=300)  # 5 min
+            await self.cache.set(cache_key, cache_data, ttl=300)
             logger.debug("Bitcoin price cached")
 
         return price_model
@@ -214,14 +201,12 @@ class DatabaseService:
     ) -> List[TransactionModel]:
         """Get user transaction history with caching"""
         cache_key = f"transactions:{phone_number}:{limit}"
-
-        # Try cache first
         cached_transactions = await self.cache.get(cache_key)
+
         if cached_transactions:
             logger.debug("Transaction history cache hit", phone=phone_number)
             return [TransactionModel(**tx) for tx in cached_transactions]
 
-        # Query database
         result = await session.execute(
             select(TransactionModel)
             .where(TransactionModel.phone_number == phone_number)
@@ -231,7 +216,6 @@ class DatabaseService:
         transactions = result.scalars().all()
 
         if transactions:
-            # Cache the results
             cache_data = [
                 {
                     "transaction_id": tx.transaction_id,
@@ -243,7 +227,7 @@ class DatabaseService:
                 }
                 for tx in transactions
             ]
-            await self.cache.set(cache_key, cache_data, ttl=600)  # 10 min
+            await self.cache.set(cache_key, cache_data, ttl=600)
             logger.debug("Transaction history cached", phone=phone_number)
 
         return list(transactions)
@@ -252,33 +236,32 @@ class DatabaseService:
         """Invalidate all cached data for a user"""
         cache_keys = [
             f"user_session:{phone_number}",
-            f"transactions:{phone_number}:*",  # Would need pattern deletion
+            f"transactions:{phone_number}:*",  # Pattern deletion assumed
+            # to be handled
         ]
-
         for key in cache_keys:
             await self.cache.delete(key)
 
         logger.debug("User cache invalidated", phone=phone_number)
 
-    async def get_database_stats(self, session: AsyncSession) -> Dict[str, Any]:
+    async def get_database_stats(
+        self, session: AsyncSession
+    ) -> Dict[str, Any]:
         """Get database performance statistics"""
         try:
-            # User statistics
             user_count_result = await session.execute(
-                select(func.count(UserSessionModel.id))
+                select(func.count(UserSessionModel.id)) # type: ignore
             )
             user_count = user_count_result.scalar()
 
-            # Transaction statistics
             transaction_count_result = await session.execute(
                 select(func.count(TransactionModel.id))
             )
             transaction_count = transaction_count_result.scalar()
 
-            # Active sessions (last 24 hours)
             yesterday = datetime.utcnow() - timedelta(days=1)
             active_sessions_result = await session.execute(
-                select(func.count[UserSessionModel.id]).where(
+                select(func.count(UserSessionModel.id)).where(
                     UserSessionModel.last_activity > yesterday
                 )
             )
@@ -298,28 +281,24 @@ class DatabaseService:
     async def cleanup_old_data(self, session: AsyncSession) -> Dict[str, int]:
         """Clean up old data to maintain performance"""
         try:
-            # Clean old message history (older than 30 days)
             thirty_days_ago = datetime.utcnow() - timedelta(days=30)
-
             old_messages_result = await session.execute(
                 text(
                     """
-                DELETE FROM message_history
-                WHERE created_at < :cutoff_date
-                """
+                    DELETE FROM message_history
+                    WHERE created_at < :cutoff_date
+                    """
                 ),
                 {"cutoff_date": thirty_days_ago},
             )
 
-            # Clean old bitcoin prices (keep only last 7 days)
             seven_days_ago = datetime.utcnow() - timedelta(days=7)
-
             old_prices_result = await session.execute(
                 text(
                     """
-                DELETE FROM bitcoin_prices
-                WHERE timestamp < :cutoff_date
-                """
+                    DELETE FROM bitcoin_prices
+                    WHERE timestamp < :cutoff_date
+                    """
                 ),
                 {"cutoff_date": seven_days_ago},
             )
@@ -327,8 +306,12 @@ class DatabaseService:
             await session.commit()
 
             return {
-                "messages_deleted": getattr(old_messages_result, "rowcount", 0),
-                "prices_deleted": getattr(old_prices_result, "rowcount", 0),
+                "messages_deleted": getattr(
+                    old_messages_result, "rowcount", 0
+                ),
+                "prices_deleted": getattr(
+                    old_prices_result, "rowcount", 0
+                ),
             }
 
         except Exception as e:

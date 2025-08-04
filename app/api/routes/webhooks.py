@@ -25,7 +25,7 @@ async def whatsapp_webhook(request: Request) -> Dict[str, str]:
         return {"status": "received"}
     except Exception as e:
         logger.error("Error processing WhatsApp webhook", error=str(e))
-        raise HTTPException(status_code=400, detail="Invalid payload")
+        raise HTTPException(status_code=400, detail="Invalid payload") from e
 
 
 @webhook_router.post("/bitsacco")
@@ -40,7 +40,7 @@ async def bitsacco_webhook(request: Request) -> Dict[str, str]:
         return {"status": "received"}
     except Exception as e:
         logger.error("Error processing Bitsacco webhook", error=str(e))
-        raise HTTPException(status_code=400, detail="Invalid payload")
+        raise HTTPException(status_code=400, detail="Invalid payload") from e
 
 
 @webhook_router.get("/test")
