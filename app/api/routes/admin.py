@@ -3,10 +3,12 @@ Admin API routes for Bitsacco WhatsApp Bot
 Administrative operations and monitoring endpoints
 """
 
-from fastapi import APIRouter, HTTPException, Query
-from typing import Dict, Any, Optional
+import random
 from datetime import datetime, timedelta
+from typing import Dict, Any, Optional
+
 import structlog
+from fastapi import APIRouter, HTTPException, Query
 
 from ...config import settings
 
@@ -143,22 +145,15 @@ async def get_metrics() -> Dict[str, Any]:
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
-# Voice settings endpoints
+# Voice settings endpoints (placeholder - voice service removed)
 @admin_router.get("/voice/settings")
 async def get_voice_settings() -> Dict[str, Any]:
-    """Get voice settings"""
+    """Get voice settings - placeholder endpoint"""
     try:
-        # Import here to avoid circular import
-        from ...services.voice_service import ElevenLabsVoiceService
-
-        voice_service = ElevenLabsVoiceService()
-
-        settings = await voice_service.get_voice_settings()
-        available_voices = await voice_service.get_available_voices()
-
         return {
-            **settings,
-            "available_voices": available_voices,
+            "message": "Voice service not available",
+            "voice_enabled": False,
+            "available_voices": [],
         }
     except Exception as e:
         logger.error("Error getting voice settings", error=str(e))
@@ -167,20 +162,10 @@ async def get_voice_settings() -> Dict[str, Any]:
 
 @admin_router.put("/voice/settings")
 async def update_voice_settings(settings: Dict[str, Any]) -> Dict[str, str]:
-    """Update voice settings"""
+    """Update voice settings - placeholder endpoint"""
     try:
-        # Import here to avoid circular import
-        from ...services.voice_service import ElevenLabsVoiceService
-
-        voice_service = ElevenLabsVoiceService()
-
-        success = await voice_service.update_voice_settings(settings)
-        if success:
-            return {"message": "Voice settings updated successfully"}
-        else:
-            raise HTTPException(
-                status_code=400, detail="Failed to update voice settings"
-            )
+        logger.info("Voice settings update requested", settings=settings)
+        return {"message": "Voice service not available"}
     except Exception as e:
         logger.error("Error updating voice settings", error=str(e))
         raise HTTPException(status_code=500, detail="Internal server error")
@@ -188,24 +173,13 @@ async def update_voice_settings(settings: Dict[str, Any]) -> Dict[str, str]:
 
 @admin_router.post("/voice/test")
 async def test_voice(data: Dict[str, Any]) -> Dict[str, Any]:
-    """Test voice synthesis"""
+    """Test voice synthesis - placeholder endpoint"""
     try:
-        # Import here to avoid circular import
-        from ...services.voice_service import ElevenLabsVoiceService
-
-        voice_service = ElevenLabsVoiceService()
-
-        text = data.get(
-            "text",
-            (
-                "Hello, this is a test of the ElevenLabs voice synthesis "
-                "system."
-            ),
-        )
-        voice_id = data.get("voice_id")
-
-        result = await voice_service.test_voice(text, voice_id)
-        return result
+        logger.info("Voice test requested", data=data)
+        return {
+            "message": "Voice service not available",
+            "success": False,
+        }
     except Exception as e:
         logger.error("Error testing voice", error=str(e))
         raise HTTPException(status_code=500, detail="Internal server error")
