@@ -15,7 +15,7 @@ logger = structlog.get_logger(__name__)
 users_router = APIRouter(tags=["Users"])
 
 
-@users_router.get("/users")
+@users_router.get("/")
 async def list_users(
     db: AsyncSession = Depends(get_database_session),
 ) -> Dict[str, Any]:
@@ -33,7 +33,7 @@ async def list_users(
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
-@users_router.get("/users/{user_id}")
+@users_router.get("/{user_id}")
 async def get_user(
     user_id: str, db: AsyncSession = Depends(get_database_session)
 ) -> Dict[str, Any]:
@@ -49,7 +49,7 @@ async def get_user(
         raise HTTPException(status_code=404, detail="User not found")
 
 
-@users_router.delete("/users/{user_id}")
+@users_router.delete("/{user_id}")
 async def delete_user(
     user_id: str, db: AsyncSession = Depends(get_database_session)
 ) -> Dict[str, str]:

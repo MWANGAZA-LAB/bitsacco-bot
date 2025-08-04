@@ -92,39 +92,10 @@ const Analytics: React.FC = () => {
       setLoading(true);
       setError(null);
 
-      // Simulated data - replace with actual API call
-      const mockData: AnalyticsData = {
-        totalUsers: 1247,
-        activeUsers: 89,
-        messagesProcessed: 5632,
-        transactions: 234,
-        responseTime: 1.2,
-        successRate: 98.5,
-        userGrowth: [
-          { date: '2024-01-01', users: 100, messages: 450 },
-          { date: '2024-01-02', users: 150, messages: 680 },
-          { date: '2024-01-03', users: 200, messages: 920 },
-          { date: '2024-01-04', users: 280, messages: 1200 },
-          { date: '2024-01-05', users: 350, messages: 1580 },
-          { date: '2024-01-06', users: 420, messages: 1890 },
-          { date: '2024-01-07', users: 500, messages: 2100 },
-        ],
-        messageTypes: [
-          { type: 'Text', count: 3200, color: '#8884d8' },
-          { type: 'Voice', count: 1200, color: '#82ca9d' },
-          { type: 'Image', count: 800, color: '#ffc658' },
-          { type: 'Document', count: 432, color: '#ff7300' },
-        ],
-        hourlyActivity: [
-          { hour: '00:00', activity: 12 },
-          { hour: '06:00', activity: 45 },
-          { hour: '12:00', activity: 128 },
-          { hour: '18:00', activity: 95 },
-          { hour: '24:00', activity: 67 },
-        ],
-      };
-
-      setData(mockData);
+      // Fetch real analytics data from API
+      const analyticsData = await apiService.getAnalytics('24h');
+      
+      setData(analyticsData);
     } catch (err) {
       setError('Failed to fetch analytics data');
       console.error('Analytics fetch error:', err);

@@ -37,7 +37,11 @@ import {
   PlayArrow,
   CheckCircle,
   Error,
+  Palette,
+  Brightness4,
+  Brightness7,
 } from '@mui/icons-material';
+import { useThemeMode } from '../contexts/ThemeContext';
 
 interface SystemSettings {
   general: {
@@ -76,6 +80,7 @@ interface SystemSettings {
 }
 
 const Settings: React.FC = () => {
+  const { mode, toggleTheme } = useThemeMode();
   const [settings, setSettings] = useState<SystemSettings>({
     general: {
       appName: 'Bitsacco WhatsApp Bot',
@@ -196,6 +201,50 @@ const Settings: React.FC = () => {
       <Typography variant="h4" component="h1" gutterBottom>
         System Settings
       </Typography>
+
+      {/* Theme Settings */}
+      <Accordion>
+        <AccordionSummary expandIcon={<ExpandMore />}>
+          <Box display="flex" alignItems="center">
+            <Palette sx={{ mr: 1 }} />
+            <Typography variant="h6">Theme & Appearance</Typography>
+          </Box>
+        </AccordionSummary>
+        <AccordionDetails>
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <Alert severity="info">
+                Customize the appearance of the admin dashboard.
+              </Alert>
+            </Grid>
+            <Grid item xs={12}>
+              <Box display="flex" alignItems="center" justifyContent="space-between">
+                <Box display="flex" alignItems="center">
+                  {mode === 'dark' ? <Brightness4 sx={{ mr: 1 }} /> : <Brightness7 sx={{ mr: 1 }} />}
+                  <Typography variant="body1">
+                    Dark Mode
+                  </Typography>
+                </Box>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={mode === 'dark'}
+                      onChange={toggleTheme}
+                      color="primary"
+                    />
+                  }
+                  label={mode === 'dark' ? 'Enabled' : 'Disabled'}
+                />
+              </Box>
+            </Grid>
+            <Grid item xs={12}>
+              <Typography variant="body2" color="text.secondary">
+                Toggle between light and dark themes. Your preference will be saved automatically.
+              </Typography>
+            </Grid>
+          </Grid>
+        </AccordionDetails>
+      </Accordion>
 
       {/* General Settings */}
       <Accordion defaultExpanded>

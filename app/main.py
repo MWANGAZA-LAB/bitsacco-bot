@@ -19,12 +19,15 @@ from .config import settings
 from .database.session import DatabaseManager
 from .services.whatsapp_service import WhatsAppService
 from .services.bitsacco_api import BitsaccoAPIClient
-from .services.simple_bitcoin_service import SimpleBitcoinPriceService
-from .services.ai_service import AIConversationService
 from .services.user_service import UserService
+from .services.ai_service import AIConversationService
+from .services.simple_bitcoin_service import SimpleBitcoinPriceService
+from .services.voice_service import ElevenLabsVoiceService
 from .api.routes.health import health_router
 from .api.routes.webhooks import webhook_router
 from .api.routes.users import users_router
+from .api.routes.admin import admin_router
+from .api.routes import router as api_router
 from .utils.logging import setup_logging
 
 # Configure structured logging
@@ -49,6 +52,7 @@ async def lifespan(app: FastAPI):
     services["bitcoin_price"] = SimpleBitcoinPriceService()
     services["bitsacco_api"] = BitsaccoAPIClient()
     services["ai_conversation"] = AIConversationService()
+    services["voice_service"] = ElevenLabsVoiceService()
     services["user_service"] = UserService(services["bitsacco_api"])
 
     # Initialize WhatsApp service (this will handle QR code scanning)
@@ -63,10 +67,12 @@ async def lifespan(app: FastAPI):
     # Start background services
     # Note: SimpleBitcoinPriceService doesn't need start/stop lifecycle
     await services["bitsacco_api"].initialize()
-    await services["ai_conversation"].initialize()
+    await services["ai_conversation"].start()
+    await services["voice_service"].start()
 
-    # Start WhatsApp bot
-    await whatsapp_service.initialize()
+    # Initialize WhatsApp service (disabled for testing)
+    # await whatsapp_service.initialize()
+    logger.info("⚠️ WhatsApp service disabled for testing")
 
     logger.info("✅ All services initialized successfully")
 
@@ -115,6 +121,8 @@ def create_app() -> FastAPI:
     app.include_router(health_router, tags=["Health"])
     app.include_router(webhook_router, prefix="/webhooks", tags=["Webhooks"])
     app.include_router(users_router, prefix="/api/users", tags=["Users"])
+    app.include_router(admin_router, prefix="/api", tags=["Admin"])
+    app.include_router(api_router, prefix="/api", tags=["API"])
 
     @app.get("/")
     async def root():
@@ -172,6 +180,7 @@ get_bitsacco_api = get_service("bitsacco_api")
 get_user_service = get_service("user_service")
 get_ai_service = get_service("ai_conversation")
 get_bitcoin_service = get_service("bitcoin_price")
+get_voice_service = get_service("voice_service")
 
 
 if __name__ == "__main__":
