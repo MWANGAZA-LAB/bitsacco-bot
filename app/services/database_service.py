@@ -250,12 +250,12 @@ class DatabaseService:
         """Get database performance statistics"""
         try:
             user_count_result = await session.execute(
-                select(func.count(UserSessionModel.id)) # type: ignore
+                select(func.count(UserSessionModel.id))  # type: ignore
             )
             user_count = user_count_result.scalar()
 
             transaction_count_result = await session.execute(
-                select(func.count(TransactionModel.id))
+                select(func.count(TransactionModel.id))  # type: ignore
             )
             transaction_count = transaction_count_result.scalar()
 
@@ -263,7 +263,7 @@ class DatabaseService:
             active_sessions_result = await session.execute(
                 select(func.count(UserSessionModel.id)).where(
                     UserSessionModel.last_activity > yesterday
-                )
+                )  # type: ignore
             )
             active_sessions = active_sessions_result.scalar()
 
@@ -314,7 +314,7 @@ class DatabaseService:
                 ),
             }
 
-        except Exception as e:
+        except (ValueError, RuntimeError, AttributeError) as e:
             logger.error("Error during data cleanup", error=str(e))
             await session.rollback()
             return {"messages_deleted": 0, "prices_deleted": 0}
