@@ -35,9 +35,7 @@ class TestUserAuthenticationFlow:
             "first_name": "John",
         }
         mock_services["bitsacco_api"].send_otp.return_value = {"success": True}
-        mock_services["bitsacco_api"].verify_otp.return_value = {
-            "success": True
-        }
+        mock_services["bitsacco_api"].verify_otp.return_value = {"success": True}
 
         # Test authentication flow
         user_service = mock_services["user_service"]

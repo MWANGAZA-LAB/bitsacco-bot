@@ -12,6 +12,7 @@ from typing import TYPE_CHECKING
 
 try:
     import redis.asyncio as aioredis
+
     REDIS_AVAILABLE = True
 except ImportError:
     if TYPE_CHECKING:
@@ -78,9 +79,7 @@ class CacheService:
 
         return None
 
-    async def set(
-        self, key: str, value: Any, ttl: Optional[int] = None
-    ) -> bool:
+    async def set(self, key: str, value: Any, ttl: Optional[int] = None) -> bool:
         """Set value in cache"""
         if not self.redis:
             return False

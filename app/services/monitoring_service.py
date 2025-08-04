@@ -128,9 +128,7 @@ class MonitoringService:
         recent_metrics = self._get_recent_metrics(minutes=5)
 
         return {
-            "status": (
-                "healthy" if len(self.active_alerts) == 0 else "degraded"
-            ),
+            "status": ("healthy" if len(self.active_alerts) == 0 else "degraded"),
             "active_alerts": len(self.active_alerts),
             "critical_alerts": len(
                 [

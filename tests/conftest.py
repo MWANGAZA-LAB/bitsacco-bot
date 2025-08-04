@@ -10,7 +10,7 @@ from sqlalchemy.pool import StaticPool
 from httpx import AsyncClient
 from fastapi.testclient import TestClient
 
-from app.test_app import create_test_app
+from tests.test_app_simple import create_test_app
 from app.database.models import Base
 
 

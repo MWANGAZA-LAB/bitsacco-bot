@@ -9,7 +9,7 @@ from datetime import datetime
 from app.services.user_service import UserService
 from app.services.ai_service import AIConversationService
 from app.services.simple_bitcoin_service import SimpleBitcoinPriceService
-from app.models.user import UserSession, UserState, MessageContext
+from app.models.user import UserSession, UserState, MessageContext, MessageType
 
 
 class TestUserService:
@@ -45,9 +45,7 @@ class TestUserService:
     @pytest.mark.asyncio
     async def test_start_authentication_success(self, user_service):
         """Test successful authentication start"""
-        success, message = await user_service.start_authentication(
-            "+254700000000"
-        )
+        success, message = await user_service.start_authentication("+254700000000")
 
         assert success is True
         assert "Verification Code Sent" in message
@@ -59,9 +57,7 @@ class TestUserService:
         await user_service.start_authentication("+254700000000")
 
         # Verify OTP
-        success, message = await user_service.verify_otp(
-            "+254700000000", "123456"
-        )
+        success, message = await user_service.verify_otp("+254700000000", "123456")
 
         assert success is True
         assert "Verification Successful" in message
@@ -116,14 +112,12 @@ class TestAIService:
 
         message_context = MessageContext(
             user_id="test_user_id",
-            text="Hello",
-            message_type="text",
-            timestamp=datetime.utcnow()
+            original_message="Hello",
+            message_type=MessageType.TEXT,
+            timestamp=datetime.utcnow(),
         )
 
-        response = await ai_service.generate_response(
-            user_session, message_context
-        )
+        response = await ai_service.generate_response(user_session, message_context)
 
         assert response == "Hello! How can I help you?"
 

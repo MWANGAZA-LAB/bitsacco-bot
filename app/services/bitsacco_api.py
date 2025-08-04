@@ -125,9 +125,7 @@ class BitsaccoAPIClient:
                 "channel": "sms",
             }
 
-            response = await self._make_request(
-                "POST", "/auth/send-otp", json=payload
-            )
+            response = await self._make_request("POST", "/auth/send-otp", json=payload)
 
             if response:
                 return {
@@ -143,9 +141,7 @@ class BitsaccoAPIClient:
             logger.error("Error sending OTP", error=str(e), phone=phone_number)
             return {"success": False, "message": f"Error: {str(e)}"}
 
-    async def verify_otp(
-        self, phone_number: str, otp_code: str
-    ) -> Dict[str, Any]:
+    async def verify_otp(self, phone_number: str, otp_code: str) -> Dict[str, Any]:
         """Verify OTP code"""
         try:
             payload = {
@@ -283,9 +279,7 @@ class BitsaccoAPIClient:
             )
             return {"success": False, "message": f"Error: {str(e)}"}
 
-    async def get_transaction_status(
-        self, transaction_id: str
-    ) -> Dict[str, Any]:
+    async def get_transaction_status(self, transaction_id: str) -> Dict[str, Any]:
         """Get status of specific transaction"""
         try:
             endpoint = f"/transactions/{transaction_id}/status"
@@ -319,9 +313,7 @@ class BitsaccoAPIClient:
         """Update user preferences"""
         try:
             endpoint = f"/users/{user_id}/preferences"
-            response = await self._make_request(
-                "PATCH", endpoint, json=preferences
-            )
+            response = await self._make_request("PATCH", endpoint, json=preferences)
 
             if response:
                 return {
@@ -423,9 +415,7 @@ class BitsaccoAPIClient:
                     await asyncio.sleep(wait_time)
                     continue
                 else:
-                    logger.error(
-                        "Request timeout after all retries", endpoint=endpoint
-                    )
+                    logger.error("Request timeout after all retries", endpoint=endpoint)
                     raise
 
             except httpx.NetworkError as e:
@@ -439,9 +429,7 @@ class BitsaccoAPIClient:
                     await asyncio.sleep(wait_time)
                     continue
                 else:
-                    logger.error(
-                        "Network error after all retries", error=str(e)
-                    )
+                    logger.error("Network error after all retries", error=str(e))
                     raise
 
             except Exception as e:

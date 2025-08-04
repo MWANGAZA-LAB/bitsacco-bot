@@ -14,18 +14,12 @@ class SimpleBitcoinPriceService:
         self.api_url = "https://api.coingecko.com/api/v3/simple/price"
         self.timeout = 10.0
 
-    async def get_current_price(
-        self, currency: str = "usd"
-    ) -> Optional[float]:
+    async def get_current_price(self, currency: str = "usd") -> Optional[float]:
         """Get current Bitcoin price - simple and reliable"""
         try:
             async with httpx.AsyncClient(timeout=self.timeout) as client:
                 response = await client.get(
-                    self.api_url,
-                    params={
-                        "ids": "bitcoin",
-                        "vs_currencies": currency
-                    }
+                    self.api_url, params={"ids": "bitcoin", "vs_currencies": currency}
                 )
                 if response.status_code == 200:
                     data = response.json()
@@ -34,11 +28,7 @@ class SimpleBitcoinPriceService:
         except Exception:
             return None  # Fail silently, handle in calling code
 
-    def format_price(
-        self,
-        price: Optional[float],
-        currency: str = "USD"
-    ) -> str:
+    def format_price(self, price: Optional[float], currency: str = "USD") -> str:
         """Format price for display"""
         if price is None:
             return "Price unavailable"

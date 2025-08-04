@@ -32,9 +32,7 @@ class DatabaseManager:
             self.engine = create_async_engine(
                 settings.DATABASE_URL,
                 echo=settings.DEBUG,
-                poolclass=(
-                    StaticPool if "sqlite" in settings.DATABASE_URL else None
-                ),
+                poolclass=(StaticPool if "sqlite" in settings.DATABASE_URL else None),
                 connect_args=(
                     {"check_same_thread": False}
                     if "sqlite" in settings.DATABASE_URL
@@ -87,6 +85,7 @@ class DatabaseManager:
 
             # Test connection
             from sqlalchemy import text
+
             async with self.engine.begin() as conn:
                 await conn.execute(text("SELECT 1"))
 

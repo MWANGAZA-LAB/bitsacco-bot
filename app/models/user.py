@@ -88,6 +88,8 @@ class UserSession:
     def is_expired(self, timeout_seconds: int) -> bool:
         """Check if session is expired"""
         now = datetime.utcnow()
+        if self.last_activity is None:
+            return True
         return (now - self.last_activity).total_seconds() > timeout_seconds
 
     def update_activity(self):
