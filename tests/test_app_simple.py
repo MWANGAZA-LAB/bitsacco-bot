@@ -79,7 +79,9 @@ def create_test_app() -> FastAPI:
     async def whatsapp_webhook_verify(
         hub_mode: Optional[str] = Query(None, alias="hub.mode"),
         hub_challenge: Optional[str] = Query(None, alias="hub.challenge"),
-        hub_verify_token: Optional[str] = Query(None, alias="hub.verify_token"),
+        hub_verify_token: Optional[str] = Query(
+            None, alias="hub.verify_token"
+        ),
     ) -> str:
         """WhatsApp webhook verification"""
         if hub_mode == "subscribe" and hub_verify_token == "your_verify_token":

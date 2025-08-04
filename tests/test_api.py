@@ -57,9 +57,13 @@ class TestWhatsAppWebhook:
         response = test_client.get("/webhook/whatsapp", params=params)
         assert response.status_code == 403
 
-    def test_webhook_message(self, test_client: TestClient, mock_whatsapp_message):
+    def test_webhook_message(
+        self, test_client: TestClient, mock_whatsapp_message
+    ):
         """Test incoming webhook message"""
-        response = test_client.post("/webhook/whatsapp", json=mock_whatsapp_message)
+        response = test_client.post(
+            "/webhook/whatsapp", json=mock_whatsapp_message
+        )
         assert response.status_code == 200
 
         data = response.json()

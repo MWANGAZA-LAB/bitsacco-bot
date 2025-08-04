@@ -5,7 +5,11 @@ Test Configuration - pytest setup and fixtures
 import pytest
 import asyncio
 from typing import AsyncGenerator
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
+from sqlalchemy.ext.asyncio import (
+    create_async_engine,
+    AsyncSession,
+    async_sessionmaker,
+)
 from sqlalchemy.pool import StaticPool
 from httpx import AsyncClient
 from fastapi.testclient import TestClient

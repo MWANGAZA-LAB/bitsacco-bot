@@ -467,7 +467,7 @@ _Your phone number must be registered with Bitsacco.com_
         normalized_phone = self._normalize_phone_number(phone)
 
         if not self._is_valid_phone_number(normalized_phone):
-            await self._send_message(
+            await self.send_message(
                 user_id,
                 (
                     "❌ Please enter a valid phone number with country code "
@@ -483,7 +483,7 @@ _Your phone number must be registered with Bitsacco.com_
             )
 
             if not user_data.get("exists", True):
-                await self._send_message(
+                await self.send_message(
                     user_id,
                     f"❌ No Bitsacco account found for {normalized_phone}.\n\n"
                     f"Please register at https://bitsacco.com first.",
@@ -494,7 +494,7 @@ _Your phone number must be registered with Bitsacco.com_
             otp_result = await self.bitsacco_api.send_otp(normalized_phone)
 
             if otp_result.get("success"):
-                await self._send_message(
+                await self.send_message(
                     user_id,
                     f"📱 OTP sent to {normalized_phone}\n\n"
                     f"Please enter the 6-digit code:",
@@ -502,7 +502,7 @@ _Your phone number must be registered with Bitsacco.com_
                 session.current_state = UserState.AWAITING_OTP
                 session.phone_number = normalized_phone
             else:
-                await self._send_message(
+                await self.send_message(
                     user_id, "❌ Failed to send OTP. Please try again."
                 )
 
@@ -520,7 +520,7 @@ _Your phone number must be registered with Bitsacco.com_
         otp_digits = "".join(filter(str.isdigit, otp))
 
         if len(otp_digits) != 6:
-            await self._send_message(
+            await self.send_message(
                 user_id, "❌ Please enter a valid 6-digit OTP"
             )
             return
@@ -554,13 +554,13 @@ What would you like to do?
 
                 await self._send_message(user_id, welcome_msg)
             else:
-                await self._send_message(
+                await self.send_message(
                     user_id, "❌ Invalid OTP. Please try again."
                 )
 
         except Exception as e:
             logger.error("Error in OTP verification", error=str(e))
-            await self._send_message(
+            await self.send_message(
                 user_id, "❌ Error verifying OTP. Please try again."
             )
 
