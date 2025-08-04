@@ -4,7 +4,6 @@ Compatible with pydantic v2 and testing environment
 """
 
 from pydantic_settings import BaseSettings
-from pydantic import ConfigDict
 from typing import List, Optional
 
 
@@ -63,15 +62,18 @@ class Settings(BaseSettings):
     ELEVENLABS_VOICE_ID: str = "default"
 
     # CORS
-    CORS_ORIGINS: List[str] = ["http://localhost:3000", "http://localhost:8080"]
+    CORS_ORIGINS: List[str] = [
+        "http://localhost:3000",
+        "http://localhost:8080",
+    ]
     ALLOWED_HOSTS: List[str] = ["localhost", "127.0.0.1"]
 
-    model_config = ConfigDict(
-        env_file=".env",
-        env_file_encoding="utf-8",
-        case_sensitive=True,
-        extra="ignore",  # Ignore extra fields from .env
-    )
+    model_config = {
+        "env_file": ".env",
+        "env_file_encoding": "utf-8",
+        "case_sensitive": True,
+        "extra": "ignore",  # Ignore extra fields from .env
+    }
 
 
 # Global settings instance

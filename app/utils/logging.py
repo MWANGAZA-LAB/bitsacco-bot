@@ -25,7 +25,9 @@ def setup_logging() -> None:
         "disable_existing_loggers": False,
         "formatters": {
             "simple": {
-                "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+                "format": (
+                    "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+                )
             },
             "json": {
                 "()": "pythonjsonlogger.jsonlogger.JsonFormatter",
@@ -35,7 +37,9 @@ def setup_logging() -> None:
         "handlers": {
             "console": {
                 "class": "logging.StreamHandler",
-                "formatter": "json" if settings.LOG_FORMAT == "json" else "simple",
+                "formatter": (
+                    "json" if settings.LOG_FORMAT == "json" else "simple"
+                ),
                 "level": settings.LOG_LEVEL,
             },
             "file": {

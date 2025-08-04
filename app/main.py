@@ -14,6 +14,7 @@ from contextlib import asynccontextmanager
 import uvicorn
 import structlog
 from typing import Dict, Any
+import datetime
 
 from .config import settings
 from .database.session import DatabaseManager
@@ -106,7 +107,10 @@ def create_app() -> FastAPI:
     )
 
     # Security middleware
-    app.add_middleware(TrustedHostMiddleware, allowed_hosts=settings.ALLOWED_HOSTS)
+    app.add_middleware(
+        TrustedHostMiddleware,
+        allowed_hosts=settings.ALLOWED_HOSTS,
+    )
 
     # CORS middleware
     app.add_middleware(
@@ -139,14 +143,16 @@ def create_app() -> FastAPI:
     async def status():
         """Detailed service status"""
         status_info = {
+            "timestamp": datetime.datetime.utcnow().isoformat(),
             "services": {},
-            "timestamp": structlog.stdlib.datetime.datetime.utcnow().isoformat(),
         }
 
         for service_name, service in services.items():
             try:
                 if hasattr(service, "health_check"):
-                    status_info["services"][service_name] = await service.health_check()
+                    status_info["services"][service_name] = (
+                        await service.health_check()
+                    )
                 else:
                     status_info["services"][service_name] = "running"
             except Exception as e:
