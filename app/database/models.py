@@ -3,7 +3,7 @@ Database Models - SQLAlchemy models for persistent storage
 """
 
 from datetime import datetime
-from typing import TYPE_CHECKING, Any
+from typing import Any
 from sqlalchemy import (
     Column,
     String,
@@ -47,8 +47,10 @@ class UserSessionModel(Base):
     otp_sent_at = Column(DateTime)
 
     # Relationships
-    messages = relationship("MessageHistoryModel", back_populates="user_session")
-    transactions = relationship("TransactionModel", back_populates="user_session")
+    messages = relationship(
+        "MessageHistoryModel", back_populates="user_session")
+    transactions = relationship(
+        "TransactionModel", back_populates="user_session")
 
 
 class MessageHistoryModel(Base):
@@ -100,7 +102,8 @@ class TransactionModel(Base):
     completed_at = Column(DateTime)
 
     # Relationships
-    user_session = relationship("UserSessionModel", back_populates="transactions")
+    user_session = relationship(
+        "UserSessionModel", back_populates="transactions")
 
 
 class BitcoinPriceModel(Base):

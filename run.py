@@ -12,7 +12,13 @@ def check_requirements():
     """Check if all requirements are installed"""
     import importlib.util
 
-    required_packages = ["fastapi", "selenium", "openai", "structlog", "sqlalchemy"]
+    required_packages = [
+        "fastapi",
+        "selenium",
+        "openai",
+        "structlog",
+        "sqlalchemy",
+    ]
     missing_packages = []
 
     for package in required_packages:

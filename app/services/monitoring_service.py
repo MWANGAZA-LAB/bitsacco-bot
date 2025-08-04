@@ -4,9 +4,10 @@ Comprehensive system monitoring, alerting, and observability
 """
 
 import asyncio
+import psutil
 import time
 from datetime import datetime, timedelta
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List
 import structlog
 from dataclasses import dataclass
 from enum import Enum
@@ -90,7 +91,11 @@ class MonitoringService:
             self.metrics_buffer = self.metrics_buffer[-500:]
 
     async def create_alert(
-        self, severity: AlertSeverity, title: str, description: str, source: str
+        self,
+        severity: AlertSeverity,
+        title: str,
+        description: str,
+        source: str,
     ) -> None:
         """Create a new system alert"""
         alert_id = f"{source}_{int(time.time())}"
@@ -123,7 +128,9 @@ class MonitoringService:
         recent_metrics = self._get_recent_metrics(minutes=5)
 
         return {
-            "status": "healthy" if len(self.active_alerts) == 0 else "degraded",
+            "status": (
+                "healthy" if len(self.active_alerts) == 0 else "degraded"
+            ),
             "active_alerts": len(self.active_alerts),
             "critical_alerts": len(
                 [
@@ -139,8 +146,6 @@ class MonitoringService:
 
     async def _collect_system_metrics(self) -> None:
         """Background task to collect system metrics"""
-        import psutil
-
         while self.is_running:
             try:
                 # CPU metrics
@@ -216,7 +221,10 @@ class MonitoringService:
             await self.create_alert(
                 severity=severity,
                 title=f"High {metric.name.replace('_', ' ').title()}",
-                description=f"{metric.name} is {metric.value}{metric.unit}, above threshold of {threshold}{metric.unit}",
+                description=(
+                    f"{metric.name} is {metric.value}{metric.unit}, "
+                    f"above threshold of {threshold}{metric.unit}"
+                ),
                 source="metrics",
             )
 

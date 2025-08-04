@@ -37,7 +37,9 @@ class AdminService:
             user_sessions = self.user_service.user_sessions
             total_users = len(user_sessions)
             active_users = sum(
-                1 for session in user_sessions.values() if session.is_authenticated
+                1
+                for session in user_sessions.values()
+                if session.is_authenticated
             )
 
             # Get system metrics
@@ -77,7 +79,9 @@ class AdminService:
                             "total": disk.total if disk else 0,
                             "free": disk.free if disk else 0,
                             "used": disk.used if disk else 0,
-                            "percent": ((disk.used / disk.total * 100) if disk else 0),
+                            "percent": (
+                                (disk.used / disk.total * 100) if disk else 0
+                            ),
                         }
                         if disk
                         else None
@@ -86,7 +90,9 @@ class AdminService:
                 "services": services_health,
                 "uptime": self._get_uptime(),
                 "version": settings.VERSION,
-                "environment": ("production" if not settings.DEBUG else "development"),
+                "environment": (
+                    "production" if not settings.DEBUG else "development"
+                ),
             }
 
         except Exception as e:
@@ -113,13 +119,22 @@ class AdminService:
                         "current_state": session.current_state.value,
                         "created_at": session.created_at.isoformat(),
                         "last_activity": session.last_activity.isoformat(),
-                        "message_count": len(session.conversation_history or []),
+                        "message_count": len(
+                            session.conversation_history or []
+                        ),
                         "user_id": getattr(session, "user_id", None),
                     }
                 )
 
             # Sort by last activity
-            users_list.sort(key=lambda x: x["last_activity"], reverse=True)
+            users_list.sort(
+                key=lambda x: (
+                    datetime.fromisoformat(str(x["last_activity"]))
+                    if x["last_activity"]
+                    else datetime(1970, 1, 1)
+                ),
+                reverse=True
+            )
 
             # Pagination
             start_idx = (page - 1) * limit
@@ -138,7 +153,9 @@ class AdminService:
             logger.error("Error getting user management data", error=str(e))
             raise
 
-    async def get_analytics_data(self, timeframe: str = "24h") -> Dict[str, Any]:
+    async def get_analytics_data(
+        self, timeframe: str = "24h"
+    ) -> Dict[str, Any]:
         """Get analytics data for the specified timeframe"""
         try:
             user_sessions = self.user_service.user_sessions
@@ -242,7 +259,9 @@ class AdminService:
             # For now, return mock data
             mock_logs = [
                 {
-                    "timestamp": (datetime.utcnow() - timedelta(minutes=i)).isoformat(),
+                    "timestamp": (
+                        datetime.utcnow() - timedelta(minutes=i)
+                    ).isoformat(),
                     "level": "INFO",
                     "service": "whatsapp",
                     "message": f"Processed message from user {i}",
@@ -302,7 +321,9 @@ class AdminService:
             api_health = await self.bitsacco_api.health_check()
             health_status["bitsacco_api"] = {
                 "status": (
-                    "healthy" if api_health.get("status") == "healthy" else "unhealthy"
+                    "healthy"
+                    if api_health.get("status") == "healthy"
+                    else "unhealthy"
                 ),
                 "last_check": datetime.utcnow().isoformat(),
             }
@@ -341,7 +362,9 @@ class AdminService:
         except Exception:
             return "Unknown"
 
-    async def get_user_details(self, phone_number: str) -> Optional[Dict[str, Any]]:
+    async def get_user_details(
+        self, phone_number: str
+    ) -> Optional[Dict[str, Any]]:
         """Get detailed information about a specific user"""
         try:
             session = self.user_service.user_sessions.get(phone_number)
@@ -361,7 +384,11 @@ class AdminService:
             }
 
         except Exception as e:
-            logger.error("Error getting user details", error=str(e), phone=phone_number)
+            logger.error(
+                "Error getting user details",
+                error=str(e),
+                phone=phone_number
+            )
             raise
 
     async def block_user(self, phone_number: str) -> Dict[str, Any]:
@@ -369,7 +396,10 @@ class AdminService:
         try:
             if phone_number in self.user_service.user_sessions:
                 del self.user_service.user_sessions[phone_number]
-                logger.info("User blocked and session removed", phone=phone_number)
+                logger.info(
+                    "User blocked and session removed",
+                    phone=phone_number
+                )
                 return {
                     "success": True,
                     "message": f"User {phone_number} has been blocked",
@@ -381,7 +411,11 @@ class AdminService:
                 }
 
         except Exception as e:
-            logger.error("Error blocking user", error=str(e), phone=phone_number)
+            logger.error(
+                "Error blocking user",
+                error=str(e),
+                phone=phone_number
+            )
             return {
                 "success": False,
                 "message": f"Error blocking user: {str(e)}",

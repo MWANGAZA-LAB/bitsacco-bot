@@ -7,7 +7,7 @@ import hashlib
 import hmac
 import time
 from datetime import datetime, timedelta
-from typing import Dict, Any, Optional, Set
+from typing import Dict, Any, Optional, Set, List
 import structlog
 from dataclasses import dataclass
 from enum import Enum

@@ -33,7 +33,10 @@ class AIConversationService:
         """Start the AI service"""
         try:
             # Initialize OpenAI client
-            self.client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY, timeout=30.0)
+            self.client = AsyncOpenAI(
+                api_key=settings.OPENAI_API_KEY,
+                timeout=30.0,
+            )
 
             # Test the connection
             await self._test_connection()
@@ -64,18 +67,54 @@ class AIConversationService:
                 return "🤖 AI service is not available at the moment."
 
             # Get conversation context
-            context = self._get_conversation_context(user_session.phone_number or "")
+            phone = user_session.phone_number or ""
+            context = self._get_conversation_context(phone)
 
-            # Add current message to context (placeholder since original_message doesn't exist)
+            # Add current message to context (placeholder)
             context.append(
-                {"role": "user", "content": "User message"}  # TODO: Pass actual message
+                {
+                    "role": "user",
+                    "content": "User message"
+                }  # TODO: Pass actual message
             )
 
             # Generate system prompt based on user state
-            system_prompt = self._get_system_prompt(user_session, message_context)
+            system_prompt = self._get_system_prompt(
+                user_session, message_context
+            )
 
-            # Prepare messages for OpenAI
-            messages = [{"role": "system", "content": system_prompt}] + context
+            # Prepare messages for OpenAI using the correct parameter classes
+            from openai.types.chat import (
+                ChatCompletionSystemMessageParam,
+                ChatCompletionUserMessageParam,
+                ChatCompletionAssistantMessageParam,
+            )
+
+            messages: List[
+                ChatCompletionSystemMessageParam
+                | ChatCompletionUserMessageParam
+                | ChatCompletionAssistantMessageParam
+            ] = [
+                ChatCompletionSystemMessageParam(
+                    role="system",
+                    content=system_prompt
+                )
+            ]
+
+            for msg in context:
+                if msg["role"] == "user":
+                    messages.append(
+                        ChatCompletionUserMessageParam(
+                            role="user", content=msg["content"]
+                        )
+                    )
+                elif msg["role"] == "assistant":
+                    messages.append(
+                        ChatCompletionAssistantMessageParam(
+                            role="assistant", content=msg["content"]
+                        )
+                    )
+                # Add more roles if needed
 
             # Generate response
             response = await self.client.chat.completions.create(
@@ -96,7 +135,9 @@ class AIConversationService:
             context.append({"role": "assistant", "content": ai_response})
 
             # Update conversation context
-            self._update_conversation_context(user_session.phone_number or "", context)
+            self._update_conversation_context(
+                user_session.phone_number or "", context
+            )
 
             logger.debug(
                 "AI response generated",
@@ -223,7 +264,9 @@ _Type 'start' to begin!_
             del self.conversation_contexts[phone_number]
             logger.debug("Conversation context cleared", user=phone_number)
 
-    def _get_conversation_context(self, phone_number: str) -> List[Dict[str, str]]:
+    def _get_conversation_context(
+        self, phone_number: str
+    ) -> List[Dict[str, str]]:
         """Get conversation context for user"""
         return self.conversation_contexts.get(phone_number, [])
 
@@ -234,7 +277,7 @@ _Type 'start' to begin!_
         # Trim context if too long
         if len(context) > self.max_context_length:
             # Keep system message and recent messages
-            context = context[-self.max_context_length :]
+            context = context[-self.max_context_length:]
 
         self.conversation_contexts[phone_number] = context
 

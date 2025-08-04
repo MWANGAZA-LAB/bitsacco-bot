@@ -45,7 +45,9 @@ class TestUserService:
     @pytest.mark.asyncio
     async def test_start_authentication_success(self, user_service):
         """Test successful authentication start"""
-        success, message = await user_service.start_authentication("+254700000000")
+        success, message = await user_service.start_authentication(
+            "+254700000000"
+        )
 
         assert success is True
         assert "Verification Code Sent" in message
@@ -57,7 +59,9 @@ class TestUserService:
         await user_service.start_authentication("+254700000000")
 
         # Verify OTP
-        success, message = await user_service.verify_otp("+254700000000", "123456")
+        success, message = await user_service.verify_otp(
+            "+254700000000", "123456"
+        )
 
         assert success is True
         assert "Verification Successful" in message
@@ -102,16 +106,24 @@ class TestAIService:
     async def test_generate_response(self, ai_service):
         """Test AI response generation"""
         user_session = UserSession(
+            user_id="test_user_id",
             phone_number="+254700000000",
             current_state=UserState.AUTHENTICATED,
             is_authenticated=True,
+            created_at=datetime.utcnow(),
+            last_activity=datetime.utcnow(),
         )
 
         message_context = MessageContext(
-            original_message="Hello", message_type="text", timestamp=datetime.utcnow()
+            user_id="test_user_id",
+            text="Hello",
+            message_type="text",
+            timestamp=datetime.utcnow()
         )
 
-        response = await ai_service.generate_response(user_session, message_context)
+        response = await ai_service.generate_response(
+            user_session, message_context
+        )
 
         assert response == "Hello! How can I help you?"
 
@@ -119,7 +131,13 @@ class TestAIService:
     async def test_welcome_message_authenticated(self, ai_service):
         """Test welcome message for authenticated user"""
         user_session = UserSession(
-            phone_number="+254700000000", first_name="John", is_authenticated=True
+            user_id="test_user_id",
+            phone_number="+254700000000",
+            first_name="John",
+            current_state=UserState.AUTHENTICATED,
+            is_authenticated=True,
+            created_at=datetime.utcnow(),
+            last_activity=datetime.utcnow(),
         )
 
         message = await ai_service.generate_welcome_message(user_session)
@@ -130,7 +148,14 @@ class TestAIService:
     @pytest.mark.asyncio
     async def test_welcome_message_unauthenticated(self, ai_service):
         """Test welcome message for unauthenticated user"""
-        user_session = UserSession(phone_number="+254700000000", is_authenticated=False)
+        user_session = UserSession(
+            user_id="test_user_id",
+            phone_number="+254700000000",
+            current_state=UserState.INITIAL,
+            is_authenticated=False,
+            created_at=datetime.utcnow(),
+            last_activity=datetime.utcnow(),
+        )
 
         message = await ai_service.generate_welcome_message(user_session)
 

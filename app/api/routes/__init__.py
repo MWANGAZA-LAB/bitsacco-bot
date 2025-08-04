@@ -17,4 +17,10 @@ router.include_router(webhook_router, prefix="/api")
 router.include_router(users_router, prefix="/api")
 router.include_router(admin_router, prefix="/api")
 
-__all__ = ["router", "health_router", "webhook_router", "users_router", "admin_router"]
+__all__ = [
+	"router",
+	"health_router",
+	"webhook_router",
+	"users_router",
+	"admin_router",
+]

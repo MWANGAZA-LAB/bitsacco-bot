@@ -3,7 +3,11 @@ Database Configuration and Session Management
 """
 
 from typing import AsyncGenerator
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
+from sqlalchemy.ext.asyncio import (
+    create_async_engine,
+    AsyncSession,
+    async_sessionmaker,
+)
 from sqlalchemy.pool import StaticPool
 import structlog
 
@@ -28,7 +32,9 @@ class DatabaseManager:
             self.engine = create_async_engine(
                 settings.DATABASE_URL,
                 echo=settings.DEBUG,
-                poolclass=StaticPool if "sqlite" in settings.DATABASE_URL else None,
+                poolclass=(
+                    StaticPool if "sqlite" in settings.DATABASE_URL else None
+                ),
                 connect_args=(
                     {"check_same_thread": False}
                     if "sqlite" in settings.DATABASE_URL
@@ -80,8 +86,9 @@ class DatabaseManager:
                 return {"status": "unhealthy", "error": "Not connected"}
 
             # Test connection
+            from sqlalchemy import text
             async with self.engine.begin() as conn:
-                await conn.execute("SELECT 1")
+                await conn.execute(text("SELECT 1"))
 
             return {"status": "healthy", "connected": True}
 

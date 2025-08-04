@@ -7,7 +7,8 @@ from fastapi import APIRouter, HTTPException
 from typing import Dict, Any
 import structlog
 from datetime import datetime
-import os
+
+from ...config import settings
 
 logger = structlog.get_logger(__name__)
 
@@ -36,11 +37,14 @@ async def system_status() -> Dict[str, Any]:
             "status": "running",
             "timestamp": datetime.utcnow().isoformat(),
             "uptime": "Available on full implementation",
-            "environment": os.getenv("ENVIRONMENT", "development"),
+            "environment": settings.DEBUG and "development" or "production",
         }
     except Exception as e:
         logger.error("Failed to get system status", error=str(e))
-        raise HTTPException(status_code=500, detail="Failed to get system status")
+        raise HTTPException(
+            status_code=500,
+            detail="Failed to get system status"
+        ) from e
 
 
 @admin_router.get("/info")
@@ -49,13 +53,16 @@ async def system_info() -> Dict[str, Any]:
     try:
         return {
             "service": "Bitsacco WhatsApp Bot",
-            "version": "1.0.0",
-            "environment": os.getenv("ENVIRONMENT", "development"),
+            "version": settings.VERSION,
+            "environment": settings.DEBUG and "development" or "production",
             "admin_api": "active",
         }
     except Exception as e:
         logger.error("Failed to get system info", error=str(e))
-        raise HTTPException(status_code=500, detail="Failed to get system info")
+        raise HTTPException(
+            status_code=500,
+            detail="Failed to get system info"
+        ) from e
 
 
 @admin_router.get("/admin/stats")

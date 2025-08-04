@@ -55,7 +55,10 @@ class BitsaccoAPIClient:
             logger.info("✅ Bitsacco API client initialized")
 
         except Exception as e:
-            logger.error("❌ Failed to initialize Bitsacco API client", error=str(e))
+            logger.error(
+                "❌ Failed to initialize Bitsacco API client",
+                error=str(e),
+            )
             raise
 
     async def health_check(self) -> Dict[str, Any]:
@@ -99,13 +102,17 @@ class BitsaccoAPIClient:
                 return {"exists": False, "message": "User not found"}
             else:
                 logger.error(
-                    "Error fetching user by phone", error=str(e), phone=phone_number
+                    "Error fetching user by phone",
+                    error=str(e),
+                    phone=phone_number,
                 )
                 raise
 
         except Exception as e:
             logger.error(
-                "Unexpected error fetching user", error=str(e), phone=phone_number
+                "Unexpected error fetching user",
+                error=str(e),
+                phone=phone_number,
             )
             raise
 
@@ -118,7 +125,9 @@ class BitsaccoAPIClient:
                 "channel": "sms",
             }
 
-            response = await self._make_request("POST", "/auth/send-otp", json=payload)
+            response = await self._make_request(
+                "POST", "/auth/send-otp", json=payload
+            )
 
             if response:
                 return {
@@ -134,7 +143,9 @@ class BitsaccoAPIClient:
             logger.error("Error sending OTP", error=str(e), phone=phone_number)
             return {"success": False, "message": f"Error: {str(e)}"}
 
-    async def verify_otp(self, phone_number: str, otp_code: str) -> Dict[str, Any]:
+    async def verify_otp(
+        self, phone_number: str, otp_code: str
+    ) -> Dict[str, Any]:
         """Verify OTP code"""
         try:
             payload = {
@@ -165,7 +176,11 @@ class BitsaccoAPIClient:
                 }
 
         except Exception as e:
-            logger.error("Error verifying OTP", error=str(e), phone=phone_number)
+            logger.error(
+                "Error verifying OTP",
+                error=str(e),
+                phone=phone_number,
+            )
             return {"success": False, "message": f"Error: {str(e)}"}
 
     async def get_balance(self, user_id: str) -> Dict[str, Any]:
@@ -187,7 +202,11 @@ class BitsaccoAPIClient:
                 return {"success": False, "message": "Failed to fetch balance"}
 
         except Exception as e:
-            logger.error("Error fetching balance", error=str(e), user_id=user_id)
+            logger.error(
+                "Error fetching balance",
+                error=str(e),
+                user_id=user_id,
+            )
             return {"success": False, "message": f"Error: {str(e)}"}
 
     async def initiate_bitcoin_savings(
@@ -219,7 +238,10 @@ class BitsaccoAPIClient:
                     "expires_at": response.get("expires_at"),
                 }
             else:
-                return {"success": False, "message": "Failed to initiate savings"}
+                return {
+                    "success": False,
+                    "message": "Failed to initiate savings",
+                }
 
         except Exception as e:
             logger.error(
@@ -255,11 +277,15 @@ class BitsaccoAPIClient:
 
         except Exception as e:
             logger.error(
-                "Error fetching transaction history", error=str(e), user_id=user_id
+                "Error fetching transaction history",
+                error=str(e),
+                user_id=user_id,
             )
             return {"success": False, "message": f"Error: {str(e)}"}
 
-    async def get_transaction_status(self, transaction_id: str) -> Dict[str, Any]:
+    async def get_transaction_status(
+        self, transaction_id: str
+    ) -> Dict[str, Any]:
         """Get status of specific transaction"""
         try:
             endpoint = f"/transactions/{transaction_id}/status"
@@ -293,7 +319,9 @@ class BitsaccoAPIClient:
         """Update user preferences"""
         try:
             endpoint = f"/users/{user_id}/preferences"
-            response = await self._make_request("PATCH", endpoint, json=preferences)
+            response = await self._make_request(
+                "PATCH", endpoint, json=preferences
+            )
 
             if response:
                 return {
@@ -302,10 +330,17 @@ class BitsaccoAPIClient:
                     "updated_at": response.get("updated_at"),
                 }
             else:
-                return {"success": False, "message": "Failed to update preferences"}
+                return {
+                    "success": False,
+                    "message": "Failed to update preferences",
+                }
 
         except Exception as e:
-            logger.error("Error updating preferences", error=str(e), user_id=user_id)
+            logger.error(
+                "Error updating preferences",
+                error=str(e),
+                user_id=user_id,
+            )
             return {"success": False, "message": f"Error: {str(e)}"}
 
     async def _make_request(
@@ -352,7 +387,8 @@ class BitsaccoAPIClient:
                     return None
                 elif response.status_code in [401, 403]:
                     logger.error(
-                        "Authentication failed", status_code=response.status_code
+                        "Authentication failed",
+                        status_code=response.status_code,
                     )
                     raise httpx.HTTPStatusError(
                         message="Authentication failed",
@@ -387,7 +423,9 @@ class BitsaccoAPIClient:
                     await asyncio.sleep(wait_time)
                     continue
                 else:
-                    logger.error("Request timeout after all retries", endpoint=endpoint)
+                    logger.error(
+                        "Request timeout after all retries", endpoint=endpoint
+                    )
                     raise
 
             except httpx.NetworkError as e:
@@ -401,12 +439,16 @@ class BitsaccoAPIClient:
                     await asyncio.sleep(wait_time)
                     continue
                 else:
-                    logger.error("Network error after all retries", error=str(e))
+                    logger.error(
+                        "Network error after all retries", error=str(e)
+                    )
                     raise
 
             except Exception as e:
                 logger.error(
-                    "Unexpected error in API request", error=str(e), endpoint=endpoint
+                    "Unexpected error in API request",
+                    error=str(e),
+                    endpoint=endpoint,
                 )
                 raise
 

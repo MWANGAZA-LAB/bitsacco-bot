@@ -184,7 +184,7 @@ jobs:
     if: github.ref == 'refs/heads/develop' || github.event_name == 'pull_request'
 
     environment:
-      name: staging
+      name: Staging
       url: https://staging-bot.bitsacco.com
 
     steps:
@@ -216,7 +216,7 @@ jobs:
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
 
     environment:
-      name: production
+      name: Production
       url: https://bot.bitsacco.com
 
     steps:

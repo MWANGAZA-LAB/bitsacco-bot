@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 import structlog
 
 from ..models.user import UserSession, UserState
-from ..services.bitsacco_api import BitsaccoAPIService
+from ..services.bitsacco_api import BitsaccoAPIClient
 
 logger = structlog.get_logger(__name__)
 
@@ -16,7 +16,7 @@ logger = structlog.get_logger(__name__)
 class UserService:
     """Production user service with session management"""
 
-    def __init__(self, bitsacco_api: BitsaccoAPIService):
+    def __init__(self, bitsacco_api: BitsaccoAPIClient):
         self.bitsacco_api = bitsacco_api
         self.user_sessions: Dict[str, UserSession] = {}
         self.is_running = False
@@ -132,7 +132,10 @@ _The code expires in 5 minutes_
                 """.strip(),
                 )
             else:
-                return False, "❌ Failed to send verification code. Please try again."
+                return (
+                    False,
+                    "❌ Failed to send verification code. Please try again."
+                )
 
         except Exception as e:
             logger.error(
@@ -140,14 +143,19 @@ _The code expires in 5 minutes_
             )
             return False, "❌ Authentication error. Please try again later."
 
-    async def verify_otp(self, phone_number: str, otp_code: str) -> tuple[bool, str]:
+    async def verify_otp(
+        self, phone_number: str, otp_code: str
+    ) -> tuple[bool, str]:
         """Verify OTP code"""
         try:
             session = await self.get_or_create_session(phone_number)
 
             # Check if user is in correct state
             if session.current_state != UserState.WAITING_FOR_OTP:
-                return False, "❌ No verification in progress. Type 'start' to begin."
+                return (
+                    False,
+                    "❌ No verification in progress. Type 'start' to begin."
+                )
 
             # Check OTP timeout
             if session.otp_sent_at:
@@ -157,11 +165,16 @@ _The code expires in 5 minutes_
                     await self.update_session(session)
                     return (
                         False,
-                        "❌ Verification code expired. Type 'start' to get a new code.",
+                        (
+                            "❌ Verification code expired. "
+                            "Type 'start' to get a new code."
+                        ),
                     )
 
             # Verify OTP with Bitsacco API
-            is_valid = await self.bitsacco_api.verify_otp(phone_number, otp_code)
+            is_valid = await self.bitsacco_api.verify_otp(
+                phone_number, otp_code
+            )
 
             if is_valid:
                 # Authentication successful
@@ -238,17 +251,26 @@ _Keep your account secure and never share your verification codes!_
 
                 return profile_info
             else:
-                return "❌ Unable to fetch profile information. Please try again."
+                return (
+                    "❌ Unable to fetch profile information. "
+                    "Please try again."
+                )
 
         except Exception as e:
-            logger.error("Error getting user profile", user=phone_number, error=str(e))
+            logger.error(
+                "Error getting user profile",
+                user=phone_number,
+                error=str(e)
+            )
             return "❌ Error fetching profile. Please try again."
 
     async def health_check(self) -> Dict[str, Any]:
         """Health check for monitoring"""
         active_sessions = len(self.user_sessions)
         authenticated_sessions = sum(
-            1 for session in self.user_sessions.values() if session.is_authenticated
+            1
+            for session in self.user_sessions.values()
+            if session.is_authenticated
         )
 
         return {

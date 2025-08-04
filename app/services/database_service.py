@@ -3,29 +3,29 @@ Production Database and Caching Service
 Optimized database operations with Redis caching layer
 """
 
-import asyncio
 import json
 from datetime import datetime, timedelta
-from typing import Dict, Any, Optional, List, Union
+from typing import Dict, Any, Optional, List
 import structlog
-from dataclasses import asdict
+
+from typing import TYPE_CHECKING
 
 try:
     import redis.asyncio as aioredis
+    REDIS_AVAILABLE = True
 except ImportError:
-    aioredis = None
+    if TYPE_CHECKING:
+        import redis.asyncio as aioredis  # type: ignore
+    REDIS_AVAILABLE = False
 
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import text, select, and_, or_
-from sqlalchemy.orm import selectinload
+from sqlalchemy import text, select, func
 
 from ..database.models import (
     UserSessionModel,
-    MessageHistoryModel,
     TransactionModel,
     BitcoinPriceModel,
 )
-from ..models.user import UserSession, UserState
 
 logger = structlog.get_logger(__name__)
 
@@ -35,23 +35,24 @@ class CacheService:
 
     def __init__(self, redis_url: str = "redis://localhost:6379/0"):
         self.redis_url = redis_url
-        self.redis: Optional[aioredis.Redis] = None
+        self.redis: Any = None  # Type: aioredis.Redis when available
         self.default_ttl = 3600  # 1 hour default TTL
 
     async def start(self) -> None:
         """Initialize Redis connection"""
-        if not aioredis:
+        if not REDIS_AVAILABLE:
             logger.warning("Redis not available, caching disabled")
             return
 
         try:
-            self.redis = await aioredis.from_url(
-                self.redis_url, encoding="utf-8", decode_responses=True
-            )
+            if aioredis:
+                self.redis = await aioredis.from_url(
+                    self.redis_url, encoding="utf-8", decode_responses=True
+                )
 
-            # Test connection
-            await self.redis.ping()
-            logger.info("✅ Redis cache service started")
+                # Test connection
+                await self.redis.ping()
+                logger.info("✅ Redis cache service started")
 
         except Exception as e:
             logger.error("Failed to start Redis cache", error=str(e))
@@ -77,7 +78,9 @@ class CacheService:
 
         return None
 
-    async def set(self, key: str, value: Any, ttl: Optional[int] = None) -> bool:
+    async def set(
+        self, key: str, value: Any, ttl: Optional[int] = None
+    ) -> bool:
         """Set value in cache"""
         if not self.redis:
             return False
@@ -122,7 +125,11 @@ class CacheService:
                 "connected_clients": info.get("connected_clients"),
             }
         except Exception as e:
-            return {"status": "error", "error": str(e), "redis_available": False}
+            return {
+                "status": "error",
+                "error": str(e),
+                "redis_available": False,
+            }
 
 
 class DatabaseService:
@@ -142,7 +149,8 @@ class DatabaseService:
         if cached_data:
             logger.debug("User session cache hit", phone=phone_number)
             # Convert back to model instance
-            # Note: This is simplified - in production you'd use proper serialization
+            # Note: This is simplified -
+            # in production you'd use proper serialization
             return UserSessionModel(**cached_data)
 
         # Query database
@@ -258,22 +266,22 @@ class DatabaseService:
         try:
             # User statistics
             user_count_result = await session.execute(
-                select(UserSessionModel.id).count()
+                select(func.count(UserSessionModel.id))
             )
             user_count = user_count_result.scalar()
 
             # Transaction statistics
             transaction_count_result = await session.execute(
-                select(TransactionModel.id).count()
+                select(func.count(TransactionModel.id))
             )
             transaction_count = transaction_count_result.scalar()
 
             # Active sessions (last 24 hours)
             yesterday = datetime.utcnow() - timedelta(days=1)
             active_sessions_result = await session.execute(
-                select(UserSessionModel.id)
-                .where(UserSessionModel.last_activity > yesterday)
-                .count()
+                select(func.count[UserSessionModel.id]).where(
+                    UserSessionModel.last_activity > yesterday
+                )
             )
             active_sessions = active_sessions_result.scalar()
 
@@ -320,11 +328,11 @@ class DatabaseService:
             await session.commit()
 
             return {
-                "messages_deleted": old_messages_result.rowcount,
-                "prices_deleted": old_prices_result.rowcount,
+                "messages_deleted": getattr(old_messages_result, "rowcount", 0),
+                "prices_deleted": getattr(old_prices_result, "rowcount", 0),
             }
 
         except Exception as e:
             logger.error("Error during data cleanup", error=str(e))
             await session.rollback()
-            return {"error": str(e)}
+            return {"messages_deleted": 0, "prices_deleted": 0}
