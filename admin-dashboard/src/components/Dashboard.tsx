@@ -3,45 +3,36 @@
  * Provides quick insights and system status at a glance
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   Grid,
   Card,
   CardContent,
-  CardActions,
   Typography,
   Box,
   Button,
   LinearProgress,
-  Chip,
   Avatar,
   List,
   ListItem,
   ListItemAvatar,
   ListItemText,
-  IconButton,
-  Alert,
-  Paper,
-  useTheme,
 } from '@mui/material';
 import { useThemeMode } from '../contexts/ThemeContext';
 import {
   PlayArrow,
   Stop,
   Refresh,
-  CheckCircle,
   Error,
   Warning,
   Info,
   People,
   Message,
-  Bluetooth,
   Computer,
   AttachMoney,
   TrendingUp,
   NotificationsActive,
 } from '@mui/icons-material';
-import { apiService } from '../services/api';
 
 interface SystemStatus {
   whatsappConnected: boolean;
@@ -70,9 +61,8 @@ interface RecentActivity {
 }
 
 const Dashboard: React.FC = () => {
-  const theme = useTheme();
   const { mode } = useThemeMode();
-  
+
   // Glassmorphism card styles
   const glassCardStyle = {
     background: mode === 'dark'
@@ -93,7 +83,7 @@ const Dashboard: React.FC = () => {
     },
   };
 
-  const [systemStatus, setSystemStatus] = useState<SystemStatus>({
+  const [systemStatus] = useState<SystemStatus>({
     whatsappConnected: true,
     bitsaccoApiStatus: true,
     databaseStatus: true,
@@ -103,7 +93,7 @@ const Dashboard: React.FC = () => {
     version: '3.0.0',
   });
 
-  const [quickStats, setQuickStats] = useState<QuickStats>({
+  const [quickStats] = useState<QuickStats>({
     activeUsers: 89,
     messagesProcessed: 1247,
     transactionsToday: 34,
@@ -111,7 +101,7 @@ const Dashboard: React.FC = () => {
     errorRate: 0.5,
   });
 
-  const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([
+  const [recentActivity] = useState<RecentActivity[]>([
     {
       id: '1',
       type: 'user_joined',
@@ -143,18 +133,6 @@ const Dashboard: React.FC = () => {
   ]);
 
   const [loading, setLoading] = useState(false);
-
-  const getStatusIcon = (status: boolean) => {
-    return status ? (
-      <CheckCircle color="success" />
-    ) : (
-      <Error color="error" />
-    );
-  };
-
-  const getStatusColor = (status: boolean) => {
-    return status ? 'success' : 'error';
-  };
 
   const getActivityIcon = (type: RecentActivity['type']) => {
     switch (type) {

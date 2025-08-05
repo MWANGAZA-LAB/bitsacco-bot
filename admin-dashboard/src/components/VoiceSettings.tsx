@@ -35,15 +35,10 @@ import {
 import {
   PlayArrow,
   Stop,
-  VolumeUp,
-  Settings,
   Save,
-  Refresh,
   Science,
-  Language,
   RecordVoiceOver,
 } from '@mui/icons-material';
-import { apiService } from '../services/api';
 
 interface VoiceConfig {
   enabled: boolean;

@@ -16,7 +16,6 @@ import {
   TableHead,
   TableRow,
   TablePagination,
-  Paper,
   Chip,
   IconButton,
   Button,
@@ -33,8 +32,6 @@ import {
   ListItemAvatar,
   ListItemText,
   Divider,
-  Alert,
-  Tooltip,
   Menu,
   MenuItem,
 } from '@mui/material';
@@ -45,15 +42,11 @@ import {
   Person,
   Block,
   Delete,
-  Visibility,
   Message,
-  Phone,
   AccessTime,
   CheckCircle,
   Cancel,
-  Warning,
 } from '@mui/icons-material';
-import { apiService } from '../services/api';
 
 interface User {
   id: string;

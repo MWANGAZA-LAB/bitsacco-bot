@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { Routes, Route, Navigate, Link, useLocation } from 'react-router-dom'
 import {
   AppBar,
@@ -12,7 +12,6 @@ import {
   ListItemButton,
   Box,
   IconButton,
-  useTheme,
 } from '@mui/material'
 import {
   Dashboard as DashboardIcon,
@@ -45,7 +44,6 @@ const menuItems = [
 
 function App() {
   const [mobileOpen, setMobileOpen] = useState(false)
-  const theme = useTheme()
   const location = useLocation()
   const { mode, toggleTheme } = useThemeMode()
 
