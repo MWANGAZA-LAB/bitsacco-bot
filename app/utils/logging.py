@@ -7,7 +7,7 @@ import logging
 import logging.config
 import structlog
 from pathlib import Path
-from typing import Dict, Any
+from typing import Dict, Any, Union
 
 from ..config import settings
 
@@ -72,18 +72,25 @@ def setup_logging() -> None:
     # Apply logging configuration
     logging.config.dictConfig(logging_config)
 
-    # Configure structlog
+    # Configure structlog with proper type handling
+    # Use Union type for renderer compatibility
+    final_renderer: Union[
+        structlog.processors.JSONRenderer,
+        structlog.dev.ConsoleRenderer
+    ]
+
+    if settings.LOG_FORMAT == "json":
+        final_renderer = structlog.processors.JSONRenderer()
+    else:
+        final_renderer = structlog.dev.ConsoleRenderer()
+
     structlog.configure(
         processors=[
             structlog.contextvars.merge_contextvars,
             structlog.processors.add_log_level,
             structlog.processors.StackInfoRenderer(),
             structlog.dev.set_exc_info,
-            (
-                structlog.processors.JSONRenderer()
-                if settings.LOG_FORMAT == "json"
-                else structlog.dev.ConsoleRenderer()
-            ),
+            final_renderer,
         ],
         wrapper_class=structlog.make_filtering_bound_logger(
             logging.getLevelName(settings.LOG_LEVEL)

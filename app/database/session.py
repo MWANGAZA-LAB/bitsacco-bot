@@ -24,7 +24,7 @@ class DatabaseManager:
         self.engine: Optional[AsyncEngine] = None
         self.async_session_maker: Optional[async_sessionmaker] = None
 
-    async def initialize(self, database_url: Optional[str] = None):
+    async def initialize(self, database_url: Optional[str] = None) -> None:
         """Initialize database connection"""
         db_url = database_url or settings.DATABASE_URL
 
@@ -49,7 +49,7 @@ class DatabaseManager:
             expire_on_commit=False,
         )
 
-    async def create_tables(self):
+    async def create_tables(self) -> None:
         """Create all database tables"""
         if not self.engine:
             raise RuntimeError("Database not initialized")
@@ -57,7 +57,7 @@ class DatabaseManager:
         async with self.engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
 
-    async def close(self):
+    async def close(self) -> None:
         """Close database connections"""
         if self.engine:
             await self.engine.dispose()
@@ -89,12 +89,12 @@ async def get_database_session() -> AsyncGenerator[AsyncSession, None]:
         yield session
 
 
-async def init_database():
+async def init_database() -> None:
     """Initialize database for application startup"""
     await db_manager.initialize()
     await db_manager.create_tables()
 
 
-async def close_database():
+async def close_database() -> None:
     """Close database connections for application shutdown"""
     await db_manager.close()
