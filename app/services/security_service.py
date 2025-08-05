@@ -5,6 +5,7 @@ Comprehensive security hardening, rate limiting, and threat detection
 
 import hashlib
 import hmac
+import os
 import time
 from datetime import datetime, timedelta
 from typing import Dict, Any, Optional, Set, List
@@ -142,7 +143,9 @@ class SecurityService:
         }
 
         # Use environment variable for JWT secret in production
-        secret = "your-jwt-secret-key"  # Should be from environment
+        secret = os.getenv("JWT_SECRET_KEY", "dev-fallback-secret-please-change-in-production")
+        if secret == "dev-fallback-secret-please-change-in-production":
+            logger.warning("Using fallback JWT secret. Set JWT_SECRET_KEY environment variable in production")
         return jwt.encode(payload, secret, algorithm="HS256")
 
     async def validate_webhook_signature(
@@ -262,7 +265,11 @@ class SecurityService:
         # Example: Multiple failed authentication attempts
         # Example: Unusual API usage patterns
         # Example: Geographic anomalies
-        pass
+        logger.debug(
+            "Checking suspicious patterns",
+            identifier=identifier,
+            source_ip=source_ip,
+        )
 
     async def _log_security_event(
         self,

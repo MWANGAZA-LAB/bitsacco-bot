@@ -306,57 +306,84 @@ const VoiceSettings: React.FC = () => {
         {/* Voice Parameters */}
         <Grid item xs={12} md={6}>
           <Card>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>
+            <CardContent sx={{ py: 2 }}>
+              <Typography variant="h6" gutterBottom sx={{ mb: 2 }}>
                 Voice Parameters
               </Typography>
 
-              <Box mb={3}>
-                <Typography gutterBottom>Stability: {config.stability}</Typography>
-                <Slider
-                  value={config.stability}
-                  onChange={(_, value) => handleConfigChange('stability', value)}
-                  min={0}
-                  max={1}
-                  step={0.01}
-                  disabled={!config.enabled}
-                  marks={[
-                    { value: 0, label: 'Variable' },
-                    { value: 1, label: 'Stable' },
-                  ]}
-                />
+              <Box mb={2}>
+                <Typography gutterBottom variant="body2" sx={{ mb: 1 }}>
+                  Stability: {config.stability}
+                </Typography>
+                <Box sx={{ px: 1 }}>
+                  <Slider
+                    value={config.stability}
+                    onChange={(_, value) => handleConfigChange('stability', value)}
+                    min={0}
+                    max={1}
+                    step={0.01}
+                    disabled={!config.enabled}
+                    marks={[
+                      { value: 0, label: 'Variable' },
+                      { value: 1, label: 'Stable' },
+                    ]}
+                    sx={{
+                      '& .MuiSlider-markLabel': {
+                        fontSize: '0.75rem',
+                      }
+                    }}
+                  />
+                </Box>
               </Box>
 
-              <Box mb={3}>
-                <Typography gutterBottom>Similarity Boost: {config.similarityBoost}</Typography>
-                <Slider
-                  value={config.similarityBoost}
-                  onChange={(_, value) => handleConfigChange('similarityBoost', value)}
-                  min={0}
-                  max={1}
-                  step={0.01}
-                  disabled={!config.enabled}
-                  marks={[
-                    { value: 0, label: 'Low' },
-                    { value: 1, label: 'High' },
-                  ]}
-                />
+              <Box mb={2}>
+                <Typography gutterBottom variant="body2" sx={{ mb: 1 }}>
+                  Similarity Boost: {config.similarityBoost}
+                </Typography>
+                <Box sx={{ px: 1 }}>
+                  <Slider
+                    value={config.similarityBoost}
+                    onChange={(_, value) => handleConfigChange('similarityBoost', value)}
+                    min={0}
+                    max={1}
+                    step={0.01}
+                    disabled={!config.enabled}
+                    marks={[
+                      { value: 0, label: 'Low' },
+                      { value: 1, label: 'High' },
+                    ]}
+                    sx={{
+                      '& .MuiSlider-markLabel': {
+                        fontSize: '0.75rem',
+                      }
+                    }}
+                  />
+                </Box>
               </Box>
 
-              <Box mb={3}>
-                <Typography gutterBottom>Style: {config.style}</Typography>
-                <Slider
-                  value={config.style}
-                  onChange={(_, value) => handleConfigChange('style', value)}
-                  min={0}
-                  max={1}
-                  step={0.01}
-                  disabled={!config.enabled}
-                  marks={[
-                    { value: 0, label: 'Natural' },
-                    { value: 1, label: 'Expressive' },
-                  ]}
-                />
+              <Box mb={2}>
+                <Typography gutterBottom variant="body2" sx={{ mb: 1 }}>
+                  Style: {config.style}
+                </Typography>
+                <Box sx={{ px: 1 }}>
+                  <Slider
+                    value={config.style}
+                    onChange={(_, value) => handleConfigChange('style', value)}
+                    min={0}
+                    max={1}
+                    step={0.01}
+                    disabled={!config.enabled}
+                    marks={[
+                      { value: 0, label: 'Natural' },
+                      { value: 1, label: 'Expressive' },
+                    ]}
+                    sx={{
+                      '& .MuiSlider-markLabel': {
+                        fontSize: '0.75rem',
+                      }
+                    }}
+                  />
+                </Box>
               </Box>
 
               <FormControlLabel
@@ -376,8 +403,8 @@ const VoiceSettings: React.FC = () => {
         {/* Voice Testing */}
         <Grid item xs={12} md={6}>
           <Card>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>
+            <CardContent sx={{ py: 2 }}>
+              <Typography variant="h6" gutterBottom sx={{ mb: 2 }}>
                 Voice Testing
               </Typography>
 

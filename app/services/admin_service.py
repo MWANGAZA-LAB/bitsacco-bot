@@ -237,8 +237,8 @@ class AdminService:
             ):
                 try:
                     self.whatsapp_service.driver.quit()
-                except Exception:
-                    pass
+                except Exception as e:
+                    logger.warning("Failed to quit WebDriver during restart", error=str(e))
 
             # Wait a moment
             await asyncio.sleep(2)

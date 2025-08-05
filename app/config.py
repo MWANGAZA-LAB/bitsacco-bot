@@ -14,7 +14,10 @@ class Settings(BaseSettings):
     APP_NAME: str = "Bitsacco WhatsApp Bot"
     VERSION: str = "3.0.0"
     DEBUG: bool = False
-    HOST: str = "0.0.0.0"
+    # HOST: 0.0.0.0 allows external connections (required for Docker)
+    # For production, consider using environment variable to set to 127.0.0.1
+    # if not using Docker
+    HOST: str = "0.0.0.0"  # nosec B104 - Required for Docker deployment
     PORT: int = 8000
 
     # Security

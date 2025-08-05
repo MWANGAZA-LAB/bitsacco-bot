@@ -192,13 +192,13 @@ const Dashboard: React.FC = () => {
     <Box sx={{ position: 'relative', zIndex: 1 }}>
       <Box
         sx={{
-          mb: 4,
+          mb: 1,
           textAlign: 'center',
           position: 'relative',
         }}
       >
         <Typography
-          variant="h3"
+          variant="h4"
           gutterBottom
           sx={{
             fontWeight: 'bold',
@@ -206,24 +206,24 @@ const Dashboard: React.FC = () => {
             backgroundClip: 'text',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
-            mb: 1,
-            letterSpacing: '1px',
+            mb: 0.25,
+            letterSpacing: '0.5px',
           }}
         >
           Dashboard Overview
         </Typography>
         <Typography
-          variant="subtitle1"
+          variant="body1"
           sx={{
             color: mode === 'dark' ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.6)',
-            fontSize: '1.1rem',
+            fontSize: '0.95rem',
           }}
         >
           Real-time monitoring of your Bitsacco WhatsApp Bot
         </Typography>
       </Box>
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-        <Typography variant="h4" component="h1">
+      <Box display="flex" justifyContent="space-between" alignItems="center" mb={1.5}>
+        <Typography variant="h5" component="h1">
           Dashboard
         </Typography>
         <Button
@@ -237,7 +237,7 @@ const Dashboard: React.FC = () => {
       </Box>
 
       {/* System Status Cards */}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
+      <Grid container spacing={3} sx={{ mb: 2 }}>
         <Grid item xs={12} sm={6} md={2.4}>
           <Card sx={glassCardStyle}>
             <CardContent sx={{ textAlign: 'center', py: 3 }}>

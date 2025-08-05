@@ -3,9 +3,9 @@ Admin API routes for Bitsacco WhatsApp Bot
 Administrative operations and monitoring endpoints
 """
 
-import random
+import secrets
 from datetime import datetime, timedelta
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List, Union
 
 import structlog
 from fastapi import APIRouter, HTTPException, Query
@@ -15,6 +15,23 @@ from ...config import settings
 logger = structlog.get_logger(__name__)
 
 admin_router = APIRouter(tags=["Admin"])
+
+
+def secure_randint(min_val: int, max_val: int) -> int:
+    """
+    Generate a secure random integer between min_val and max_val (inclusive)
+    """
+    return secrets.randbelow(max_val - min_val + 1) + min_val
+
+
+def secure_uniform(min_val: float, max_val: float) -> float:
+    """Generate a secure random float between min_val and max_val"""
+    return min_val + (max_val - min_val) * (secrets.randbelow(10000) / 10000.0)
+
+
+def secure_choice(choices: List[Any]) -> Any:
+    """Securely choose a random element from a list"""
+    return choices[secrets.randbelow(len(choices))]
 
 
 @admin_router.get("/health")
@@ -143,12 +160,12 @@ async def get_metrics() -> Dict[str, Any]:
     """Get system metrics"""
     try:
         return {
-            "cpu_usage": random.uniform(10, 80),
-            "memory_usage": random.uniform(40, 90),
-            "disk_usage": random.uniform(20, 70),
-            "network_io": random.uniform(100, 1000),
-            "active_connections": random.randint(5, 50),
-            "response_time": random.uniform(0.5, 3.0),
+            "cpu_usage": secure_uniform(10, 80),
+            "memory_usage": secure_uniform(40, 90),
+            "disk_usage": secure_uniform(20, 70),
+            "network_io": secure_uniform(100, 1000),
+            "active_connections": secure_randint(5, 50),
+            "response_time": secure_uniform(0.5, 3.0),
         }
     except Exception as e:
         logger.error("Error getting metrics", error=str(e))
@@ -300,17 +317,17 @@ async def get_message_history(
             messages.append(
                 {
                     "id": f"msg_{i+1}",
-                    "user_id": user_id or f"user_{random.randint(1, 100)}",
+                    "user_id": user_id or f"user_{secure_randint(1, 100)}",
                     "phone_number": (
-                        f"+25470{random.randint(1000000, 9999999)}"
+                        f"+25470{secure_randint(1000000, 9999999)}"
                     ),
                     "message": f"Sample message {i+1}",
-                    "type": random.choice(["text", "voice", "image"]),
+                    "type": secure_choice(["text", "voice", "image"]),
                     "timestamp": (
                         datetime.utcnow()
-                        - timedelta(hours=random.randint(1, 24))
+                        - timedelta(hours=secure_randint(1, 24))
                     ).isoformat(),
-                    "direction": random.choice(["incoming", "outgoing"]),
+                    "direction": secure_choice(["incoming", "outgoing"]),
                 }
             )
 
@@ -343,18 +360,18 @@ async def get_logs(
             logs.append(
                 {
                     "id": f"log_{i+1}",
-                    "level": random.choice(levels),
+                    "level": secure_choice(levels),
                     "message": f"Sample log message {i+1}",
                     "timestamp": (
                         datetime.utcnow()
-                        - timedelta(minutes=random.randint(1, 60))
+                        - timedelta(minutes=secure_randint(1, 60))
                     ).isoformat(),
-                    "module": random.choice(
+                    "module": secure_choice(
                         ["whatsapp", "api", "database", "ai"]
                     ),
                     "user_id": (
-                        f"user_{random.randint(1, 100)}"
-                        if random.choice([True, False])
+                        f"user_{secure_randint(1, 100)}"
+                        if secure_choice([True, False])
                         else None
                     ),
                 }
