@@ -3,8 +3,9 @@
         // Python Development
         "ms-python.python",
         "ms-python.vscode-pylance",
-        "ms-python.black-formatter",
-        "ms-python.flake8",
+        // BLACK AND FLAKE8 DISABLED TO PRESERVE MANUAL FORMATTING
+        // "ms-python.black-formatter",
+        // "ms-python.flake8",
         "ms-python.mypy-type-checker",
         "ms-python.debugpy",
 

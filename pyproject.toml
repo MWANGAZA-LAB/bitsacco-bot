@@ -1,38 +1,41 @@
-[tool.black]
-line-length = 88
-target-version = ['py311']
-include = '\.pyi?$'
-extend-exclude = '''
-/(
-  # directories
-  \.eggs
-  | \.git
-  | \.hg
-  | \.mypy_cache
-  | \.tox
-  | \.venv
-  | _build
-  | buck-out
-  | build
-  | dist
-)/
-'''
+# BLACK FORMATTER DISABLED TO PRESERVE MANUAL FORMATTING
+# [tool.black]
+# line-length = 88
+# target-version = ['py311']
+# include = '\.pyi?$'
+# extend-exclude = '''
+# /(
+#   # directories
+#   \.eggs
+#   | \.git
+#   | \.hg
+#   | \.mypy_cache
+#   | \.tox
+#   | \.venv
+#   | _build
+#   | buck-out
+#   | build
+#   | dist
+# )/
+# '''
 
+# ISORT PROFILE CHANGED FROM BLACK TO PREVENT CONFLICTS
 [tool.isort]
-profile = "black"
+profile = "google"
 line_length = 88
 
-[tool.flake8]
-max-line-length = 88
-extend-ignore = ["E203", "W503"]
-exclude = [
-    ".git",
-    "__pycache__",
-    ".venv",
-    "build",
-    "dist",
-    "*.egg-info"
-]
+# FLAKE8 DISABLED TO PRESERVE MANUAL FORMATTING
+# [tool.flake8]
+# max-line-length = 88
+# extend-ignore = ["E203", "W503"]
+# exclude = [
+#     ".git",
+#     "__pycache__",
+#     ".venv",
+#     "build",
+#     "dist",
+#     "*.egg-info"
+# ]
 
 [tool.mypy]
 python_version = "3.11"

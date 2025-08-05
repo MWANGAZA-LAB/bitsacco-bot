@@ -54,49 +54,51 @@
 			"isBackground": false,
 			"problemMatcher": []
 		},
-		{
-			"label": "Format Code (Black)",
-			"type": "shell",
-			"command": "python",
-			"args": [
-				"-m",
-				"black",
-				"app/",
-				"tests/"
-			],
-			"group": "build",
-			"isBackground": false,
-			"problemMatcher": []
-		},
-		{
-			"label": "Lint Code (Flake8)",
-			"type": "shell",
-			"command": "python",
-			"args": [
-				"-m",
-				"flake8",
-				"app/",
-				"tests/",
-				"--max-line-length=88",
-				"--extend-ignore=E203,W503"
-			],
-			"group": "build",
-			"isBackground": false,
-			"problemMatcher": [
-				{
-					"owner": "python",
-					"fileLocation": "absolute",
-					"pattern": {
-						"regexp": "^(.+):(\\d+):(\\d+):\\s+(\\w+)\\s+(.+)$",
-						"file": 1,
-						"line": 2,
-						"column": 3,
-						"severity": 4,
-						"message": 5
-					}
-				}
-			]
-		},
+		// BLACK FORMATTER TASK DISABLED TO PRESERVE MANUAL FORMATTING
+		// {
+		// 	"label": "Format Code (Black)",
+		// 	"type": "shell",
+		// 	"command": "python",
+		// 	"args": [
+		// 		"-m",
+		// 		"black",
+		// 		"app/",
+		// 		"tests/"
+		// 	],
+		// 	"group": "build",
+		// 	"isBackground": false,
+		// 	"problemMatcher": []
+		// },
+		// FLAKE8 LINTING TASK DISABLED TO PRESERVE MANUAL FORMATTING
+		// {
+		// 	"label": "Lint Code (Flake8)",
+		// 	"type": "shell",
+		// 	"command": "python",
+		// 	"args": [
+		// 		"-m",
+		// 		"flake8",
+		// 		"app/",
+		// 		"tests/",
+		// 		"--max-line-length=88",
+		// 		"--extend-ignore=E203,W503"
+		// 	],
+		// 	"group": "build",
+		// 	"isBackground": false,
+		// 	"problemMatcher": [
+		// 		{
+		// 			"owner": "python",
+		// 			"fileLocation": "absolute",
+		// 			"pattern": {
+		// 				"regexp": "^(.+):(\\d+):(\\d+):\\s+(\\w+)\\s+(.+)$",
+		// 				"file": 1,
+		// 				"line": 2,
+		// 				"column": 3,
+		// 				"severity": 4,
+		// 				"message": 5
+		// 			}
+		// 		}
+		// 	]
+		// },
 		{
 			"label": "Type Check (MyPy)",
 			"type": "shell",

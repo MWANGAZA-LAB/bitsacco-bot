@@ -139,7 +139,7 @@ class WhatsAppService:
         except Exception as e:
             logger.error(
                 "❌ Failed to initialize WhatsApp service",
-                error=str(e)
+                error=str(e),
             )
             await self.stop()
             raise
@@ -225,8 +225,7 @@ class WhatsAppService:
 
         if self.driver is None:
             logger.error(
-                "WebDriver is not initialized in "
-                "_get_unread_messages"
+                "WebDriver is not initialized in _get_unread_messages"
             )
             return messages
 
@@ -269,8 +268,7 @@ class WhatsAppService:
         try:
             if self.driver is None:
                 logger.error(
-                    "WebDriver is not initialized in "
-                    "_extract_chat_messages"
+                    "WebDriver is not initialized in " "_extract_chat_messages"
                 )
                 return messages
             # Get chat info
@@ -428,8 +426,8 @@ class WhatsAppService:
     async def _get_user_session(self, user_id: str) -> UserSession:
         """Get or create user session"""
         if user_id not in self.user_sessions:
-            # Try to load from database
-            db_session = await self.user_service.get_user_session(user_id)
+            # Try to load from database - using correct method name
+            db_session = await self.user_service.get_or_create_session(user_id)
             if db_session:
                 self.user_sessions[user_id] = db_session
             else:
@@ -526,7 +524,17 @@ _Your phone number must be registered with Bitsacco.com_
             return
 
         try:
-            # Verify OTP with Bitsacco
+            # Verify OTP with Bitsacco - ensure phone_number is not None
+            if not session.phone_number:
+                await self.send_message(
+                    user_id,
+                    (
+                        "❌ Phone number missing. Please restart "
+                        "authentication."
+                    ),
+                )
+                return
+
             verify_result = await self.bitsacco_api.verify_otp(
                 session.phone_number, otp_digits
             )
@@ -535,8 +543,8 @@ _Your phone number must be registered with Bitsacco.com_
                 session.current_state = UserState.AUTHENTICATED
                 session.bitsacco_user_id = verify_result.get("user_id")
 
-                # Save session to database
-                await self.user_service.save_session(session)
+                # Save session to database - using correct method name
+                await self.user_service.update_session(session)
 
                 # Send welcome message
                 welcome_msg = """
@@ -552,7 +560,7 @@ You can now:
 What would you like to do?
                 """.strip()
 
-                await self._send_message(user_id, welcome_msg)
+                await self.send_message(user_id, welcome_msg)
             else:
                 await self.send_message(
                     user_id, "❌ Invalid OTP. Please try again."
@@ -668,25 +676,25 @@ What would you like to do?
             )
 
             if amount < 100:
-                await self._send_message(
+                await self.send_message(
                     user_id, "❌ Minimum savings amount is KES 100"
                 )
                 return
 
             if amount > 50000:
-                await self._send_message(
+                await self.send_message(
                     user_id, "❌ Maximum single savings amount is KES 50,000"
                 )
                 return
 
             # Ensure phone number is present
             if not session.phone_number:
-                await self._send_message(
+                await self.send_message(
                     user_id,
                     (
                         "❌ Unable to process savings. "
                         "Phone number missing."
-                    )
+                    ),
                 )
                 return
 
@@ -744,7 +752,10 @@ Please complete the M-Pesa payment to confirm your Bitcoin savings.
                 session.bitsacco_user_id
             )
 
-            if history_data.get("success") and history_data.get("transactions"):
+            if (
+                history_data.get("success")
+                and history_data.get("transactions")
+            ):
                 # Last 5 transactions
                 transactions = history_data["transactions"][:5]
 
@@ -754,7 +765,9 @@ Please complete the M-Pesa payment to confirm your Bitcoin savings.
                     emoji = "💰" if tx["type"] == "deposit" else "💸"
                     date = tx["date"][:10]  # YYYY-MM-DD
                     history_msg += f"{emoji} {tx['type'].title()}\n"
-                    history_msg += f"   Amount: {tx['amount']} {tx['currency']}\n"
+                    history_msg += (
+                        f"   Amount: {tx['amount']} {tx['currency']}\n"
+                    )
                     history_msg += f"   Date: {date}\n"
                     history_msg += f"   Status: {tx['status']}\n\n"
 
@@ -790,12 +803,16 @@ Please complete the M-Pesa payment to confirm your Bitcoin savings.
         """Handle AI-powered conversation"""
         try:
             if self.ai_service:
-                ai_response = await self.ai_service.process_message(
-                    user_id, session.phone_number, content, context
+                ai_response = await self.ai_service.generate_response(
+                    session, context
                 )
 
-                if ai_response.get("success"):
-                    await self.send_message(user_id, ai_response["response"])
+                # AI service returns a string, not a dict
+                unavailable_msg = (
+                    "🤖 AI service is not available at the moment."
+                )
+                if ai_response and ai_response != unavailable_msg:
+                    await self.send_message(user_id, ai_response)
                 else:
                     await self._send_help_message(user_id)
             else:
@@ -973,7 +990,9 @@ Example: "How much Bitcoin do I have?" or "I want to save 500 shillings"
                         By.CSS_SELECTOR, "[data-testid='chat-list']"
                     )
                     if not chat_list:
-                        logger.warning("⚠️ WhatsApp Web connection may be lost")
+                        logger.warning(
+                            "⚠️ WhatsApp Web connection may be lost"
+                        )
 
                 await asyncio.sleep(30)  # Check every 30 seconds
 
