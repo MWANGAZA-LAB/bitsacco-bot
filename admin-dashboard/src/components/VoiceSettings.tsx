@@ -164,9 +164,9 @@ const VoiceSettings: React.FC = () => {
         Voice Settings
       </Typography>
 
-      <Grid container spacing={3}>
+      <Grid container spacing={2}>
         {/* Service Configuration */}
-        <Grid item xs={12} md={6}>
+        <Grid item xs={12} md={6} sx={{ order: { xs: 1, md: 1 } }}>
           <Card>
             <CardContent>
               <Typography variant="h6" gutterBottom>
@@ -306,14 +306,14 @@ const VoiceSettings: React.FC = () => {
         {/* Voice Parameters */}
         <Grid item xs={12} md={6}>
           <Card>
-            <CardContent sx={{ py: 2 }}>
-              <Typography variant="h6" gutterBottom sx={{ mb: 2 }}>
-                Voice Parameters
+            <CardContent sx={{ py: 1.5, px: 2 }}>
+              <Typography variant="h6" gutterBottom sx={{ mb: 1.5, fontWeight: 600 }}>
+                🎛️ Voice Parameters
               </Typography>
 
-              <Box mb={2}>
-                <Typography gutterBottom variant="body2" sx={{ mb: 1 }}>
-                  Stability: {config.stability}
+              <Box mb={1.5}>
+                <Typography gutterBottom variant="body2" sx={{ mb: 0.5, fontWeight: 500, color: 'text.primary' }}>
+                  🎯 Stability: {config.stability.toFixed(2)} {config.stability < 0.3 ? '(Variable)' : config.stability > 0.7 ? '(Stable)' : '(Balanced)'}
                 </Typography>
                 <Box sx={{ px: 1 }}>
                   <Slider
@@ -336,9 +336,9 @@ const VoiceSettings: React.FC = () => {
                 </Box>
               </Box>
 
-              <Box mb={2}>
-                <Typography gutterBottom variant="body2" sx={{ mb: 1 }}>
-                  Similarity Boost: {config.similarityBoost}
+              <Box mb={1.5}>
+                <Typography gutterBottom variant="body2" sx={{ mb: 0.5, fontWeight: 500, color: 'text.primary' }}>
+                  🔊 Similarity Boost: {config.similarityBoost.toFixed(2)} {config.similarityBoost < 0.3 ? '(Low)' : config.similarityBoost > 0.7 ? '(High)' : '(Medium)'}
                 </Typography>
                 <Box sx={{ px: 1 }}>
                   <Slider
@@ -361,9 +361,9 @@ const VoiceSettings: React.FC = () => {
                 </Box>
               </Box>
 
-              <Box mb={2}>
-                <Typography gutterBottom variant="body2" sx={{ mb: 1 }}>
-                  Style: {config.style}
+              <Box mb={1.5}>
+                <Typography gutterBottom variant="body2" sx={{ mb: 0.5, fontWeight: 500, color: 'text.primary' }}>
+                  🎭 Style: {config.style.toFixed(2)} {config.style < 0.3 ? '(Natural)' : config.style > 0.7 ? '(Expressive)' : '(Balanced)'}
                 </Typography>
                 <Box sx={{ px: 1 }}>
                   <Slider
@@ -386,16 +386,23 @@ const VoiceSettings: React.FC = () => {
                 </Box>
               </Box>
 
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={config.useSpeakerBoost}
-                    onChange={(e) => handleConfigChange('useSpeakerBoost', e.target.checked)}
-                    disabled={!config.enabled}
-                  />
-                }
-                label="Use Speaker Boost"
-              />
+              <Box sx={{ mt: 1 }}>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={config.useSpeakerBoost}
+                      onChange={(e) => handleConfigChange('useSpeakerBoost', e.target.checked)}
+                      disabled={!config.enabled}
+                      color="primary"
+                    />
+                  }
+                  label={
+                    <Typography variant="body2" sx={{ fontWeight: 500, color: 'text.primary' }}>
+                      🔊 Use Speaker Boost {config.useSpeakerBoost ? '(Enabled)' : '(Disabled)'}
+                    </Typography>
+                  }
+                />
+              </Box>
             </CardContent>
           </Card>
         </Grid>
@@ -403,9 +410,9 @@ const VoiceSettings: React.FC = () => {
         {/* Voice Testing */}
         <Grid item xs={12} md={6}>
           <Card>
-            <CardContent sx={{ py: 2 }}>
-              <Typography variant="h6" gutterBottom sx={{ mb: 2 }}>
-                Voice Testing
+            <CardContent sx={{ py: 1.5, px: 2 }}>
+              <Typography variant="h6" gutterBottom sx={{ mb: 1.5, fontWeight: 600 }}>
+                🎤 Voice Testing
               </Typography>
 
               <TextField
@@ -467,6 +474,57 @@ const VoiceSettings: React.FC = () => {
             </CardActions>
           </Card>
         </Grid>
+
+        {/* Service Configuration - Voice List */}
+        <Grid item xs={12}>
+          <Card>
+            <CardContent>
+              <Typography variant="h6" gutterBottom>
+                Available Voices
+              </Typography>
+              <List dense>
+                {voices.map((voice) => (
+                  <ListItem key={voice.id} divider>
+                    <ListItemText
+                      primary={voice.name}
+                      secondary={
+                        <Box>
+                          <Typography variant="body2">{voice.description}</Typography>
+                          <Box mt={1}>
+                            <Chip
+                              size="small"
+                              label={voice.category}
+                              color="primary"
+                              variant="outlined"
+                            />
+                            <Chip
+                              size="small"
+                              label={voice.language.toUpperCase()}
+                              color="secondary"
+                              variant="outlined"
+                              sx={{ ml: 1 }}
+                            />
+                          </Box>
+                        </Box>
+                      }
+                    />
+                    <ListItemSecondaryAction>
+                      <IconButton
+                        edge="end"
+                        onClick={() => handleConfigChange('voiceId', voice.id)}
+                        color={config.voiceId === voice.id ? 'primary' : 'default'}
+                      >
+                        <RecordVoiceOver />
+                      </IconButton>
+                    </ListItemSecondaryAction>
+                  </ListItem>
+                ))}
+              </List>
+            </CardContent>
+          </Card>
+        </Grid>
+
+
       </Grid>
 
       {/* Advanced Test Dialog */}

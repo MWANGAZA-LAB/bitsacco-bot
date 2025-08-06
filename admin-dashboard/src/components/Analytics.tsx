@@ -48,7 +48,9 @@ interface AnalyticsData {
   successRate: number;
   userGrowth: Array<{ date: string; users: number; messages: number }>;
   messageTypes: Array<{ type: string; count: number; color: string }>;
-  hourlyActivity: Array<{ hour: string; activity: number }>;
+  hourlyActivity?: Array<{ hour: string; activity: number }>;
+  transactionVolume: Array<{ time: string; volume: number }>;
+  responseTimeHistory: Array<{ time: string; responseTime: number }>;
 }
 
 interface MetricCardProps {
@@ -92,13 +94,54 @@ const Analytics: React.FC = () => {
       setLoading(true);
       setError(null);
 
-      // Fetch real analytics data from API
+      // Fetch analytics data from API (with built-in fallback to mock data)
       const analyticsData = await apiService.getAnalytics('24h');
       
       setData(analyticsData);
     } catch (err) {
-      setError('Failed to fetch analytics data');
+      // This should rarely happen since getAnalytics has built-in fallback
       console.error('Analytics fetch error:', err);
+      setError('Failed to fetch analytics data');
+      
+      // Provide fallback data even in case of complete failure
+      setData({
+        totalUsers: 1247,
+        activeUsers: 342,
+        messagesProcessed: 8934,
+        transactions: 156,
+        responseTime: 0.85,
+        successRate: 98.5,
+        userGrowth: [
+          { date: '2025-08-01', users: 45, messages: 234 },
+          { date: '2025-08-02', users: 52, messages: 287 },
+          { date: '2025-08-03', users: 38, messages: 198 },
+          { date: '2025-08-04', users: 67, messages: 345 },
+          { date: '2025-08-05', users: 43, messages: 223 },
+          { date: '2025-08-06', users: 58, messages: 312 }
+        ],
+        messageTypes: [
+          { type: 'Text', count: 5234, color: '#8884d8' },
+          { type: 'Voice', count: 2145, color: '#82ca9d' },
+          { type: 'Image', count: 987, color: '#ffc658' },
+          { type: 'Document', count: 568, color: '#ff7300' }
+        ],
+        transactionVolume: [
+          { time: '00:00', volume: 2340 },
+          { time: '04:00', volume: 1890 },
+          { time: '08:00', volume: 4560 },
+          { time: '12:00', volume: 6780 },
+          { time: '16:00', volume: 5430 },
+          { time: '20:00', volume: 3210 }
+        ],
+        responseTimeHistory: [
+          { time: '00:00', responseTime: 0.8 },
+          { time: '04:00', responseTime: 0.6 },
+          { time: '08:00', responseTime: 1.2 },
+          { time: '12:00', responseTime: 0.9 },
+          { time: '16:00', responseTime: 1.1 },
+          { time: '20:00', responseTime: 0.7 }
+        ]
+      });
     } finally {
       setLoading(false);
     }
@@ -120,17 +163,8 @@ const Analytics: React.FC = () => {
     );
   }
 
-  if (error) {
-    return (
-      <Alert severity="error" action={
-        <IconButton onClick={fetchAnalytics} color="inherit" size="small">
-          <Refresh />
-        </IconButton>
-      }>
-        {error}
-      </Alert>
-    );
-  }
+  // Note: We no longer return early on error since we have fallback data
+  // The error will be shown as a banner at the top instead
 
   if (!data) return null;
 
@@ -146,6 +180,17 @@ const Analytics: React.FC = () => {
           </IconButton>
         </Tooltip>
       </Box>
+
+      {/* Error banner if API is unavailable but showing fallback data */}
+      {error && (
+        <Alert severity="warning" sx={{ mb: 3 }} action={
+          <IconButton onClick={fetchAnalytics} color="inherit" size="small">
+            <Refresh />
+          </IconButton>
+        }>
+          API temporarily unavailable - showing sample data. Click refresh to retry.
+        </Alert>
+      )}
 
       {/* Key Metrics */}
       <Grid container spacing={3} mb={3}>
