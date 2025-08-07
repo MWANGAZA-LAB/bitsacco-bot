@@ -5,7 +5,7 @@ Administrative operations and monitoring endpoints
 
 import secrets
 from datetime import datetime, timedelta
-from typing import Dict, Any, Optional, List, Union
+from typing import Dict, Any, Optional, List
 
 import structlog
 from fastapi import APIRouter, HTTPException, Query

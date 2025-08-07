@@ -146,11 +146,16 @@ class SecurityService:
         secret = os.getenv("JWT_SECRET_KEY")
         if not secret:
             if os.getenv("ENVIRONMENT", "development") == "production":
-                raise ValueError("JWT_SECRET_KEY environment variable is required in production")
+                raise ValueError(
+                    "JWT_SECRET_KEY environment variable is required in production"
+                )
             # Use a more secure fallback for development
             import secrets
             secret = secrets.token_urlsafe(32)
-            logger.warning("Generated temporary JWT secret for development. Set JWT_SECRET_KEY environment variable.")
+            logger.warning(
+                "Generated temporary JWT secret for development. "
+                "Set JWT_SECRET_KEY environment variable."
+            )
         return jwt.encode(payload, secret, algorithm="HS256")
 
     async def validate_webhook_signature(
