@@ -88,7 +88,7 @@ function App() {
       >
         <Box
           component="img"
-          src="./bitsaccologo.png"
+          src="/bitsacco-bot/bitsaccologo.png"
           alt="Bitsacco Logo"
           sx={{
             width: 80,
