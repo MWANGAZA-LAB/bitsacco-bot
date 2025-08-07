@@ -442,31 +442,34 @@ const Dashboard: React.FC = () => {
           { key: 'databaseStatus', label: 'Database', icon: <Storage /> },
           { key: 'aiServiceStatus', label: 'AI Service', icon: <Computer /> },
           { key: 'voiceServiceStatus', label: 'Voice Service', icon: <Speed /> },
-        ].map((service) => (
-          <Grid item xs={12} sm={6} md={2.4} key={service.key}>
-            <Card sx={glassCardStyle}>
-              <CardContent sx={{ textAlign: 'center', py: 2 }}>
-                <Box sx={{ mb: 1 }}>
-                  {React.cloneElement(service.icon, {
-                    sx: {
-                      fontSize: 32,
-                      color: getStatusColor(systemStatus[service.key as keyof SystemStatus]),
-                    }
-                  })}
-                </Box>
-                <Typography variant="body2" sx={{ fontWeight: 500, mb: 1 }}>
-                  {service.label}
-                </Typography>
-                <Box display="flex" alignItems="center" justifyContent="center" gap={0.5}>
-                  {getStatusIcon(systemStatus[service.key as keyof SystemStatus])}
-                  <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                    {systemStatus[service.key as keyof SystemStatus] ? 'Online' : 'Offline'}
+        ].map((service) => {
+          const status = systemStatus[service.key as keyof SystemStatus] as boolean;
+          return (
+            <Grid item xs={12} sm={6} md={2.4} key={service.key}>
+              <Card sx={glassCardStyle}>
+                <CardContent sx={{ textAlign: 'center', py: 2 }}>
+                  <Box sx={{ mb: 1 }}>
+                    {React.cloneElement(service.icon, {
+                      sx: {
+                        fontSize: 32,
+                        color: getStatusColor(status),
+                      }
+                    })}
+                  </Box>
+                  <Typography variant="body2" sx={{ fontWeight: 500, mb: 1 }}>
+                    {service.label}
                   </Typography>
-                </Box>
-              </CardContent>
-            </Card>
-          </Grid>
-        ))}
+                  <Box display="flex" alignItems="center" justifyContent="center" gap={0.5}>
+                    {getStatusIcon(status)}
+                    <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                      {status ? 'Online' : 'Offline'}
+                    </Typography>
+                  </Box>
+                </CardContent>
+              </Card>
+            </Grid>
+          );
+        })}
       </Grid>
 
       {/* Enhanced Metrics Cards */}
