@@ -9,7 +9,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <ThemeProvider>
       <CssBaseline />
-      <BrowserRouter>
+      <BrowserRouter basename="/bitsacco-bot">
         <App />
       </BrowserRouter>
     </ThemeProvider>
