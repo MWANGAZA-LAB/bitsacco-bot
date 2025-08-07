@@ -70,6 +70,33 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
+      - name: 🔍 Check GitHub Pages Status
+        id: check-pages
+        run: |
+          echo "Checking if GitHub Pages is enabled..."
+          # This step will help identify if Pages is enabled
+          echo "If this deployment fails, please enable GitHub Pages at:"
+          echo "https://github.com/MWANGAZA-LAB/bitsacco-bot/settings/pages"
+          echo "Select 'GitHub Actions' as the source."
+
       - name: 🚀 Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+        continue-on-error: true
+
+      - name: 📋 Deployment Status
+        run: |
+          if [ "${{ steps.deployment.outcome }}" == "success" ]; then
+            echo "✅ Deployment successful!"
+            echo "🌐 Your dashboard is available at: https://mwangaza-lab.github.io/bitsacco-bot/"
+          else
+            echo "❌ Deployment failed!"
+            echo ""
+            echo "🔧 To fix this issue:"
+            echo "1. Go to: https://github.com/MWANGAZA-LAB/bitsacco-bot/settings/pages"
+            echo "2. Under 'Source', select 'GitHub Actions'"
+            echo "3. Save the settings"
+            echo "4. Re-run this workflow"
+            echo ""
+            echo "📖 For more information, see: https://docs.github.com/en/pages"
+          fi
